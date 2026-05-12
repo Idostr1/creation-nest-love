@@ -181,9 +181,10 @@ function Index() {
     <main className="flex min-h-screen items-center justify-center p-4">
       <h1 className="sr-only">Casio fx-991ES PLUS Calculator</h1>
       <div
-        className="relative select-none"
+        className="relative select-none mx-auto"
         style={{
-          width: "min(420px, calc(95vh * 1024 / 1536))",
+          width: "min(92vw, calc(95vh * 1024 / 1536))",
+          maxWidth: "420px",
           containerType: "inline-size",
         }}
       >
@@ -192,8 +193,6 @@ function Index() {
           alt="Casio fx-991ES PLUS calculator"
           className="block w-full h-auto pointer-events-none"
           draggable={false}
-          width={1024}
-          height={1536}
         />
 
         {/* LCD overlay — blends with the screen image */}
