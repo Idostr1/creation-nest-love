@@ -182,8 +182,7 @@ function Index() {
       <div
         className="relative select-none mx-auto"
         style={{
-          width: "min(92vw, calc(95vh * 1024 / 1536))",
-          maxWidth: "420px",
+          width: "min(92vw, calc(92vh * 710 / 1479), 420px)",
           containerType: "inline-size",
         }}
       >
