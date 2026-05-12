@@ -184,15 +184,16 @@ function Index() {
         className="relative select-none"
         style={{
           width: "min(420px, calc(95vh * 1024 / 1536))",
-          aspectRatio: "1024 / 1536",
           containerType: "inline-size",
         }}
       >
         <img
           src={casioImg}
           alt="Casio fx-991ES PLUS calculator"
-          className="absolute inset-0 h-full w-full object-contain pointer-events-none"
+          className="block w-full h-auto pointer-events-none"
           draggable={false}
+          width={1024}
+          height={1536}
         />
 
         {/* LCD overlay — blends with the screen image */}
