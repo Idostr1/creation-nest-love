@@ -124,8 +124,8 @@ function Index() {
         <div
           className="absolute flex flex-col justify-between font-mono text-right"
           style={{
-            left: "8.5%", top: "14.2%", width: "83%", height: "15.5%",
-            padding: "2% 3%",
+            left: "9.3%", top: "14%", width: "82%", height: "16.5%",
+            padding: "2.5% 3.5%",
             color: "#1a1a1a",
           }}
         >
@@ -149,7 +149,7 @@ function Index() {
             key={b.v + b.l + b.t}
             onClick={() => press(b.v)}
             aria-label={b.v}
-            className="absolute rounded-md transition-all active:scale-95 active:bg-black/15 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+            className="absolute rounded-[10px] transition-all duration-75 active:translate-y-px active:bg-black/30 hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
             style={{
               left: `${b.l}%`, top: `${b.t}%`,
               width: `${b.w}%`, height: `${b.h}%`,
