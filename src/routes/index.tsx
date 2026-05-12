@@ -74,27 +74,28 @@ const TOPBTNS: Btn[] = [
 function evalExpr(expr: string, mode: "DEG" | "RAD"): string {
   if (!expr) return "0";
   try {
-    const factor = mode === "DEG" ? "*Math.PI/180" : "";
-    let s = expr
-      .replace(/π/g, "Math.PI")
-      .replace(/SIN\(/g, `Math.sin((`)
-      .replace(/COS\(/g, `Math.cos((`)
-      .replace(/TAN\(/g, `Math.tan((`)
-      .replace(/LN\(/g, "Math.log(")
-      .replace(/LOG\(/g, "Math.log10(")
-      .replace(/SQRT\(/g, "Math.sqrt(");
-    // close trig with deg factor: replace Math.sin(( ... ) with Math.sin((...)*π/180)
-    if (mode === "DEG") {
-      s = s.replace(/Math\.(sin|cos|tan)\(\(([^()]*)\)/g, `Math.$1(($2)${factor})`);
-      // also handle un-closed: leave as-is for syntax error
-    } else {
-      s = s.replace(/Math\.(sin|cos|tan)\(\(/g, "Math.$1(");
-      // remove the doubled paren we added
-    }
-    // Validate allowed chars only (allow Math, digits, operators, parens, dot, e)
-    if (!/^[\sMath0-9+\-*/.()ePIsincoatglqr,]+$/i.test(s)) return "Syntax ERROR";
+    const s = expr
+      .replace(/SIN\(/g, "_sin(")
+      .replace(/COS\(/g, "_cos(")
+      .replace(/TAN\(/g, "_tan(")
+      .replace(/LN\(/g, "_ln(")
+      .replace(/LOG\(/g, "_log(")
+      .replace(/SQRT\(/g, "_sqrt(");
+    if (!/^[\s0-9+\-*/.()_a-zA-Z]+$/.test(s)) return "Syntax ERROR";
+    const d = mode === "DEG" ? Math.PI / 180 : 1;
     // eslint-disable-next-line no-new-func
-    const result = Function(`"use strict"; return (${s})`)();
+    const fn = Function(
+      "_sin", "_cos", "_tan", "_ln", "_log", "_sqrt",
+      `"use strict"; return (${s})`
+    );
+    const result = fn(
+      (x: number) => Math.sin(x * d),
+      (x: number) => Math.cos(x * d),
+      (x: number) => Math.tan(x * d),
+      (x: number) => Math.log(x),
+      (x: number) => Math.log10(x),
+      (x: number) => Math.sqrt(x),
+    );
     if (typeof result !== "number" || !isFinite(result)) return "Math ERROR";
     return String(Number(result.toPrecision(12)));
   } catch {
