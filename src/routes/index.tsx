@@ -14,10 +14,10 @@ type Btn = {
   kind?: "num" | "op" | "eq" | "ac" | "del" | "dot";
 };
 
-const COL_W = 13;
-const ROW_H = 5.2;
-const COLS = [9.5, 24, 38.5, 53, 67.5];
-const ROWS = [63.8, 70.6, 77.4, 84.2];
+const COL_W = 10;
+const ROW_H = 4.5;
+const COLS = [19.9, 32.1, 44.4, 56.5, 68.8];
+const ROWS = [64.8, 71.6, 78.3, 85.1];
 
 const BTNS: Btn[] = [
   // Row 0: 7 8 9 DEL AC
@@ -49,7 +49,7 @@ const BTNS: Btn[] = [
 function evalExpr(expr: string): string {
   if (!expr) return "0";
   try {
-    const sanitized = expr.replace(/[^0-9+\-*/.()E]/g, "");
+    const sanitized = expr.replace(/[^0-9+\-*/.()e ]/gi, "");
     if (!sanitized) return "0";
     // eslint-disable-next-line no-new-func
     const result = Function(`"use strict"; return (${sanitized})`)();
@@ -67,17 +67,26 @@ function Index() {
 
   const press = (v: string) => {
     if (v === "AC") { setExpr(""); setResult(""); return; }
-    if (v === "DEL") { setExpr((e) => e.slice(0, -1)); return; }
+    if (v === "DEL") {
+      if (result) { setResult(""); return; }
+      setExpr((e) => e.slice(0, -1));
+      return;
+    }
     if (v === "=") {
       const r = evalExpr(expr);
       setResult(r);
       if (!r.includes("ERROR")) setAns(r);
       return;
     }
-    if (v === "ANS") { setExpr((e) => e + ans); return; }
-    if (v === "E") { setExpr((e) => e + "*10**"); return; }
-    setExpr((e) => (result && !"+-*/.".includes(v) ? v : (result ? "" : e) + v));
-    if (result) setResult("");
+    const token = v === "ANS" ? ans : v === "E" ? "*10**" : v;
+    const isOp = "+-*/".includes(v);
+    setExpr((e) => {
+      if (result && !result.includes("ERROR")) {
+        return isOp ? result + token : token;
+      }
+      return e + token;
+    });
+    setResult("");
   };
 
   useEffect(() => {
@@ -115,8 +124,8 @@ function Index() {
         <div
           className="absolute flex flex-col justify-between font-mono text-right"
           style={{
-            left: "8.5%", top: "14.2%", width: "83%", height: "15.5%",
-            padding: "2% 3%",
+            left: "9.3%", top: "14%", width: "82%", height: "16.5%",
+            padding: "2.5% 3.5%",
             color: "#1a1a1a",
           }}
         >
@@ -140,7 +149,7 @@ function Index() {
             key={b.v + b.l + b.t}
             onClick={() => press(b.v)}
             aria-label={b.v}
-            className="absolute rounded-md transition-all active:scale-95 active:bg-black/15 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+            className="absolute rounded-[10px] transition-all duration-75 active:translate-y-px active:bg-black/30 hover:bg-white/15 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
             style={{
               left: `${b.l}%`, top: `${b.t}%`,
               width: `${b.w}%`, height: `${b.h}%`,
