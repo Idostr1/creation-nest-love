@@ -183,7 +183,7 @@ function Index() {
       <div
         className="relative select-none"
         style={{
-          width: "min(420px, 95vh * 1024 / 1536)",
+          width: "min(420px, calc(95vh * 1024 / 1536))",
           aspectRatio: "1024 / 1536",
           containerType: "inline-size",
         }}
