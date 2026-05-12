@@ -14,10 +14,10 @@ type Btn = {
   kind?: "num" | "op" | "eq" | "ac" | "del" | "dot";
 };
 
-const COL_W = 10;
-const ROW_H = 4.5;
-const COLS = [19.9, 32.1, 44.4, 56.5, 68.8];
-const ROWS = [64.8, 71.6, 78.3, 85.1];
+const COL_W = 9.1;
+const ROW_H = 4.2;
+const COLS = [22.9, 34.2, 45.3, 56.4, 67.4];
+const ROWS = [64.3, 70.7, 77.1, 83.6];
 
 const BTNS: Btn[] = [
   // Row 0: 7 8 9 DEL AC
@@ -104,7 +104,7 @@ function Index() {
   }, [expr, result, ans]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-transparent p-4">
+    <main className="flex min-h-screen items-center justify-center p-4" style={{ background: "transparent" }}>
       <h1 className="sr-only">Casio fx-991ES PLUS Calculator</h1>
       <div
         className="relative select-none"
@@ -125,7 +125,7 @@ function Index() {
         <div
           className="absolute flex flex-col justify-between font-mono text-right"
           style={{
-            left: "9.3%", top: "14%", width: "82%", height: "16.5%",
+            left: "19.3%", top: "14.6%", width: "70.3%", height: "15.2%",
             padding: "1.5cqw 2.5cqw",
             color: "#1a1a1a",
           }}
