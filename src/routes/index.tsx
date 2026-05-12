@@ -9,20 +9,20 @@ export const Route = createFileRoute("/")({
 type Btn = { v: string; l: number; t: number; w: number; h: number };
 
 // Number pad (5 cols × 4 rows)
-const NCOL_W = 9.1;
-const NROW_H = 4.2;
-const NCOLS = [22.9, 34.2, 45.3, 56.4, 67.4];
-const NROWS = [64.3, 70.7, 77.1, 83.6];
+const NCOL_W = 13.6;
+const NROW_H = 4.5;
+const NCOLS = [9.6, 26.5, 43.2, 60.0, 76.6];
+const NROWS = [68.3, 75.3, 82.3, 89.4];
 
 // Sci pad (6 cols)
-const SCOLS = [22.5, 31.7, 41.0, 50.3, 59.6, 68.9];
-const SCOL_W = 7.8;
-const SROW_H = 3.6;
+const SCOLS = [9.0, 22.7, 36.7, 50.7, 64.7, 78.5];
+const SCOL_W = 11.7;
+const SROW_H = 3.9;
 
 // Top round buttons row
-const TROW = 33.5;
-const TROW_H = 4.2;
-const TCOL_W = 5.5;
+const TROW = 35.0;
+const TROW_H = 4.5;
+const TCOL_W = 8.3;
 
 const NUMBTNS: Btn[] = [
   { v: "7", l: NCOLS[0], t: NROWS[0], w: NCOL_W, h: NROW_H },
@@ -48,27 +48,26 @@ const NUMBTNS: Btn[] = [
 ];
 
 const SCIBTNS: Btn[] = [
-  // Row: √ x² x² x² x³ ln  (top ~47.2%)
-  { v: "SQRT", l: SCOLS[0], t: 47.2, w: SCOL_W, h: SROW_H },
-  { v: "SQ", l: SCOLS[1], t: 47.2, w: SCOL_W, h: SROW_H },
-  { v: "LN", l: SCOLS[5], t: 47.2, w: SCOL_W, h: SROW_H },
-  // Row: (-), .., hyp, sin, cos, tan
-  { v: "NEG", l: SCOLS[0], t: 52.7, w: SCOL_W, h: SROW_H },
-  { v: "SIN", l: SCOLS[3], t: 52.7, w: SCOL_W, h: SROW_H },
-  { v: "COS", l: SCOLS[4], t: 52.7, w: SCOL_W, h: SROW_H },
-  { v: "TAN", l: SCOLS[5], t: 52.7, w: SCOL_W, h: SROW_H },
-  // Row: RCL, ENG, (, ), S⇔D, M+
-  { v: "(", l: SCOLS[2], t: 57.9, w: SCOL_W, h: SROW_H },
-  { v: ")", l: SCOLS[3], t: 57.9, w: SCOL_W, h: SROW_H },
-  // log on row 2 col 5 actually, but we'll add LOG via row1 col4 (x³ slot reused)
-  { v: "LOG", l: SCOLS[4], t: 47.2, w: SCOL_W, h: SROW_H },
+  // Row: √ x² x² x² x³ ln  (~49.8%)
+  { v: "SQRT", l: SCOLS[0], t: 49.8, w: SCOL_W, h: SROW_H },
+  { v: "SQ", l: SCOLS[1], t: 49.8, w: SCOL_W, h: SROW_H },
+  { v: "LOG", l: SCOLS[4], t: 49.8, w: SCOL_W, h: SROW_H },
+  { v: "LN", l: SCOLS[5], t: 49.8, w: SCOL_W, h: SROW_H },
+  // Row: (-), .., hyp, sin, cos, tan (~55.8%)
+  { v: "NEG", l: SCOLS[0], t: 55.8, w: SCOL_W, h: SROW_H },
+  { v: "SIN", l: SCOLS[3], t: 55.8, w: SCOL_W, h: SROW_H },
+  { v: "COS", l: SCOLS[4], t: 55.8, w: SCOL_W, h: SROW_H },
+  { v: "TAN", l: SCOLS[5], t: 55.8, w: SCOL_W, h: SROW_H },
+  // Row: RCL, ENG, (, ), S⇔D, M+ (~61.4%)
+  { v: "(", l: SCOLS[2], t: 61.4, w: SCOL_W, h: SROW_H },
+  { v: ")", l: SCOLS[3], t: 61.4, w: SCOL_W, h: SROW_H },
 ];
 
 const TOPBTNS: Btn[] = [
-  { v: "SHIFT", l: 22.5, t: TROW, w: TCOL_W, h: TROW_H },
-  { v: "ALPHA", l: 31.7, t: TROW, w: TCOL_W, h: TROW_H },
-  { v: "MODE", l: 59.6, t: TROW, w: TCOL_W, h: TROW_H },
-  { v: "ON", l: 68.9, t: TROW, w: TCOL_W, h: TROW_H },
+  { v: "SHIFT", l: 9.0, t: TROW, w: TCOL_W, h: TROW_H },
+  { v: "ALPHA", l: 22.7, t: TROW, w: TCOL_W, h: TROW_H },
+  { v: "MODE", l: 64.7, t: TROW, w: TCOL_W, h: TROW_H },
+  { v: "ON", l: 78.5, t: TROW, w: TCOL_W, h: TROW_H },
 ];
 
 function evalExpr(expr: string, mode: "DEG" | "RAD"): string {
@@ -181,17 +180,17 @@ function Index() {
     <main className="flex min-h-screen items-center justify-center p-4">
       <h1 className="sr-only">Casio fx-991ES PLUS Calculator</h1>
       <div
-        className="relative select-none"
+        className="relative select-none mx-auto"
         style={{
-          width: "min(420px, 95vh * 1024 / 1536)",
-          aspectRatio: "1024 / 1536",
+          width: "min(92vw, calc(95vh * 1024 / 1536))",
+          maxWidth: "420px",
           containerType: "inline-size",
         }}
       >
         <img
           src={casioImg}
           alt="Casio fx-991ES PLUS calculator"
-          className="absolute inset-0 h-full w-full object-contain pointer-events-none"
+          className="block w-full h-auto pointer-events-none"
           draggable={false}
         />
 
@@ -199,11 +198,12 @@ function Index() {
         <div
           className="absolute font-mono"
           style={{
-            left: "19.3%", top: "14.6%", width: "70.3%", height: "15.2%",
+            left: "6.6%", top: "13.5%", width: "86.8%", height: "17%",
             color: "#1a1a1a",
             padding: "1cqw 2cqw",
             display: "flex",
             flexDirection: "column",
+            overflow: "hidden",
           }}
         >
           {/* status row */}
