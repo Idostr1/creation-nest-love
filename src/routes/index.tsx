@@ -203,6 +203,7 @@ function Index() {
             padding: "1cqw 2cqw",
             display: "flex",
             flexDirection: "column",
+            overflow: "hidden",
           }}
         >
           {/* status row */}
