@@ -14,10 +14,10 @@ type Btn = {
   kind?: "num" | "op" | "eq" | "ac" | "del" | "dot";
 };
 
-const COL_W = 10;
-const ROW_H = 4.5;
-const COLS = [19.9, 32.1, 44.4, 56.5, 68.8];
-const ROWS = [64.8, 71.6, 78.3, 85.1];
+const COL_W = 9.1;
+const ROW_H = 4.2;
+const COLS = [22.9, 34.2, 45.3, 56.4, 67.4];
+const ROWS = [64.3, 70.7, 77.1, 83.6];
 
 const BTNS: Btn[] = [
   // Row 0: 7 8 9 DEL AC
@@ -104,13 +104,14 @@ function Index() {
   }, [expr, result, ans]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-neutral-200 p-4">
+    <main className="flex min-h-screen items-center justify-center p-4" style={{ background: "transparent" }}>
       <h1 className="sr-only">Casio fx-991ES PLUS Calculator</h1>
       <div
         className="relative select-none"
         style={{
           width: "min(420px, 95vh * 1024 / 1536)",
           aspectRatio: "1024 / 1536",
+          containerType: "inline-size",
         }}
       >
         <img
@@ -124,20 +125,20 @@ function Index() {
         <div
           className="absolute flex flex-col justify-between font-mono text-right"
           style={{
-            left: "9.3%", top: "14%", width: "82%", height: "16.5%",
-            padding: "2.5% 3.5%",
+            left: "19.3%", top: "14.6%", width: "70.3%", height: "15.2%",
+            padding: "1.5cqw 2.5cqw",
             color: "#1a1a1a",
           }}
         >
           <div
-            className="truncate opacity-90"
-            style={{ fontSize: "clamp(10px, 2.6cqw, 18px)", letterSpacing: "0.02em" }}
+            className="truncate opacity-80"
+            style={{ fontSize: "3.6cqw", lineHeight: 1.1, letterSpacing: "0.02em" }}
           >
             {expr || "\u00A0"}
           </div>
           <div
             className="truncate font-semibold tabular-nums"
-            style={{ fontSize: "clamp(16px, 5cqw, 34px)" }}
+            style={{ fontSize: "7cqw", lineHeight: 1 }}
           >
             {result || (expr ? "" : "0")}
           </div>
