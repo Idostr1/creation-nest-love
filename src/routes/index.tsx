@@ -182,7 +182,7 @@ function Index() {
       <div
         className="relative select-none mx-auto"
         style={{
-          width: "min(92vw, calc(92vh * 710 / 1479), 420px)",
+          width: "min(92vw, calc(92vh * 717 / 1488), 420px)",
           containerType: "inline-size",
         }}
       >
@@ -193,13 +193,13 @@ function Index() {
           draggable={false}
         />
 
-        {/* LCD overlay — blends with the screen image */}
+        {/* LCD overlay — kept inside the actual glass area */}
         <div
           className="absolute font-mono"
           style={{
-            left: "8%", top: "14.2%", width: "84%", height: "15.8%",
+            left: "10.6%", top: "15.35%", width: "78.8%", height: "14.25%",
             color: "#1a1a1a",
-            padding: "1.2cqw 2.5cqw 1.5cqw",
+            padding: "0.9cqw 1.8cqw 1.2cqw",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
@@ -208,13 +208,13 @@ function Index() {
           {/* status row */}
           <div
             className="flex items-center justify-between opacity-75"
-            style={{ fontSize: "3cqw", letterSpacing: "0.1em", lineHeight: 1 }}
+            style={{ fontSize: "2.35cqw", letterSpacing: "0.08em", lineHeight: 1 }}
           >
-            <span className="flex" style={{ gap: "1.5cqw" }}>
+            <span className="flex" style={{ gap: "1.15cqw" }}>
               <span style={{ visibility: shift ? "visible" : "hidden" }}>S</span>
               <span style={{ visibility: alpha ? "visible" : "hidden" }}>A</span>
-              <span>M</span>
-              <span>STO</span>
+              <span style={{ visibility: alpha ? "visible" : "hidden" }}>M</span>
+              <span style={{ visibility: alpha ? "visible" : "hidden" }}>STO</span>
             </span>
             <span>{mode}</span>
           </div>
@@ -245,7 +245,7 @@ function Index() {
             key={b.v + b.l + b.t}
             onClick={() => press(b.v)}
             aria-label={b.v}
-            className="absolute rounded-[10px] transition-all duration-75 active:translate-y-px active:bg-black/30 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+            className="absolute rounded-[10px] cursor-pointer bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
             style={{
               left: `${b.l}%`, top: `${b.t}%`,
               width: `${b.w}%`, height: `${b.h}%`,
