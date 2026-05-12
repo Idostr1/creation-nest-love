@@ -209,9 +209,9 @@ function Index() {
           {/* status row */}
           <div
             className="flex items-center justify-between opacity-75"
-            style={{ fontSize: "2cqw", letterSpacing: "0.1em", lineHeight: 1 }}
+            style={{ fontSize: "3cqw", letterSpacing: "0.1em", lineHeight: 1 }}
           >
-            <span className="flex" style={{ gap: "1.2cqw" }}>
+            <span className="flex" style={{ gap: "1.5cqw" }}>
               <span style={{ visibility: shift ? "visible" : "hidden" }}>S</span>
               <span style={{ visibility: alpha ? "visible" : "hidden" }}>A</span>
               <span>M</span>
@@ -223,7 +223,7 @@ function Index() {
           {/* expression line — left aligned, decent size */}
           <div
             className="truncate"
-            style={{ fontSize: "5cqw", lineHeight: 1.15, marginTop: "1cqw" }}
+            style={{ fontSize: "6cqw", lineHeight: 1.15, marginTop: "1.2cqw" }}
           >
             {expr || "\u00A0"}
             {expr && !result && (
@@ -234,7 +234,7 @@ function Index() {
           {/* result line — right aligned, big */}
           <div
             className="mt-auto truncate text-right font-semibold tabular-nums"
-            style={{ fontSize: "8.5cqw", lineHeight: 1 }}
+            style={{ fontSize: "11cqw", lineHeight: 1 }}
           >
             {result || (expr ? "" : "0")}
           </div>
