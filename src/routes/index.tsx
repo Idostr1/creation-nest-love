@@ -198,9 +198,9 @@ function Index() {
         <div
           className="absolute font-mono"
           style={{
-            left: "6.6%", top: "13.5%", width: "86.8%", height: "17%",
+            left: "8%", top: "14.2%", width: "84%", height: "15.8%",
             color: "#1a1a1a",
-            padding: "1cqw 2cqw",
+            padding: "1.2cqw 2.5cqw 1.5cqw",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
@@ -208,33 +208,33 @@ function Index() {
         >
           {/* status row */}
           <div
-            className="flex items-center justify-between opacity-80"
-            style={{ fontSize: "2.2cqw", letterSpacing: "0.08em", lineHeight: 1 }}
+            className="flex items-center justify-between opacity-75"
+            style={{ fontSize: "2cqw", letterSpacing: "0.1em", lineHeight: 1 }}
           >
-            <span className="flex gap-[0.6cqw]">
+            <span className="flex" style={{ gap: "1.2cqw" }}>
               <span style={{ visibility: shift ? "visible" : "hidden" }}>S</span>
               <span style={{ visibility: alpha ? "visible" : "hidden" }}>A</span>
               <span>M</span>
               <span>STO</span>
             </span>
-            <span>{mode === "DEG" ? "D" : "R"}</span>
+            <span>{mode}</span>
           </div>
 
-          {/* expression line (left aligned like real Casio while typing) */}
+          {/* expression line — left aligned, decent size */}
           <div
             className="truncate"
-            style={{ fontSize: "3.6cqw", lineHeight: 1.1, marginTop: "0.5cqw" }}
+            style={{ fontSize: "5cqw", lineHeight: 1.15, marginTop: "1cqw" }}
           >
             {expr || "\u00A0"}
-            <span className="inline-block animate-pulse" style={{ marginLeft: "0.2cqw" }}>
-              {expr && !result ? "▮" : ""}
-            </span>
+            {expr && !result && (
+              <span className="animate-pulse" style={{ marginLeft: "0.3cqw" }}>▮</span>
+            )}
           </div>
 
           {/* result line — right aligned, big */}
           <div
             className="mt-auto truncate text-right font-semibold tabular-nums"
-            style={{ fontSize: "7cqw", lineHeight: 1 }}
+            style={{ fontSize: "8.5cqw", lineHeight: 1 }}
           >
             {result || (expr ? "" : "0")}
           </div>
