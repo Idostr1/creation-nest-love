@@ -104,13 +104,14 @@ function Index() {
   }, [expr, result, ans]);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-neutral-200 p-4">
+    <main className="flex min-h-screen items-center justify-center bg-transparent p-4">
       <h1 className="sr-only">Casio fx-991ES PLUS Calculator</h1>
       <div
         className="relative select-none"
         style={{
           width: "min(420px, 95vh * 1024 / 1536)",
           aspectRatio: "1024 / 1536",
+          containerType: "inline-size",
         }}
       >
         <img
@@ -125,19 +126,19 @@ function Index() {
           className="absolute flex flex-col justify-between font-mono text-right"
           style={{
             left: "9.3%", top: "14%", width: "82%", height: "16.5%",
-            padding: "2.5% 3.5%",
+            padding: "1.5cqw 2.5cqw",
             color: "#1a1a1a",
           }}
         >
           <div
-            className="truncate opacity-90"
-            style={{ fontSize: "clamp(10px, 2.6cqw, 18px)", letterSpacing: "0.02em" }}
+            className="truncate opacity-80"
+            style={{ fontSize: "3.6cqw", lineHeight: 1.1, letterSpacing: "0.02em" }}
           >
             {expr || "\u00A0"}
           </div>
           <div
             className="truncate font-semibold tabular-nums"
-            style={{ fontSize: "clamp(16px, 5cqw, 34px)" }}
+            style={{ fontSize: "7cqw", lineHeight: 1 }}
           >
             {result || (expr ? "" : "0")}
           </div>
