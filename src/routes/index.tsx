@@ -1,26 +1,153 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import casioImg from "@/assets/casio.png";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
+// Button positions are percentages of the calculator image (1024x1536).
+// Each entry: [label, value, leftPct, topPct, widthPct, heightPct]
+type Btn = {
+  v: string;
+  l: number; t: number; w: number; h: number;
+  kind?: "num" | "op" | "eq" | "ac" | "del" | "dot";
+};
+
+const COL_W = 13;
+const ROW_H = 5.2;
+const COLS = [9.5, 24, 38.5, 53, 67.5];
+const ROWS = [63.8, 70.6, 77.4, 84.2];
+
+const BTNS: Btn[] = [
+  // Row 0: 7 8 9 DEL AC
+  { v: "7", l: COLS[0], t: ROWS[0], w: COL_W, h: ROW_H, kind: "num" },
+  { v: "8", l: COLS[1], t: ROWS[0], w: COL_W, h: ROW_H, kind: "num" },
+  { v: "9", l: COLS[2], t: ROWS[0], w: COL_W, h: ROW_H, kind: "num" },
+  { v: "DEL", l: COLS[3], t: ROWS[0], w: COL_W, h: ROW_H, kind: "del" },
+  { v: "AC", l: COLS[4], t: ROWS[0], w: COL_W, h: ROW_H, kind: "ac" },
+  // Row 1: 4 5 6 × ÷
+  { v: "4", l: COLS[0], t: ROWS[1], w: COL_W, h: ROW_H, kind: "num" },
+  { v: "5", l: COLS[1], t: ROWS[1], w: COL_W, h: ROW_H, kind: "num" },
+  { v: "6", l: COLS[2], t: ROWS[1], w: COL_W, h: ROW_H, kind: "num" },
+  { v: "*", l: COLS[3], t: ROWS[1], w: COL_W, h: ROW_H, kind: "op" },
+  { v: "/", l: COLS[4], t: ROWS[1], w: COL_W, h: ROW_H, kind: "op" },
+  // Row 2: 1 2 3 + -
+  { v: "1", l: COLS[0], t: ROWS[2], w: COL_W, h: ROW_H, kind: "num" },
+  { v: "2", l: COLS[1], t: ROWS[2], w: COL_W, h: ROW_H, kind: "num" },
+  { v: "3", l: COLS[2], t: ROWS[2], w: COL_W, h: ROW_H, kind: "num" },
+  { v: "+", l: COLS[3], t: ROWS[2], w: COL_W, h: ROW_H, kind: "op" },
+  { v: "-", l: COLS[4], t: ROWS[2], w: COL_W, h: ROW_H, kind: "op" },
+  // Row 3: 0 . ×10ˣ Ans =
+  { v: "0", l: COLS[0], t: ROWS[3], w: COL_W, h: ROW_H, kind: "num" },
+  { v: ".", l: COLS[1], t: ROWS[3], w: COL_W, h: ROW_H, kind: "dot" },
+  { v: "E", l: COLS[2], t: ROWS[3], w: COL_W, h: ROW_H, kind: "num" },
+  { v: "ANS", l: COLS[3], t: ROWS[3], w: COL_W, h: ROW_H, kind: "num" },
+  { v: "=", l: COLS[4], t: ROWS[3], w: COL_W, h: ROW_H, kind: "eq" },
+];
+
+function evalExpr(expr: string): string {
+  if (!expr) return "0";
+  try {
+    const sanitized = expr.replace(/[^0-9+\-*/.()E]/g, "");
+    if (!sanitized) return "0";
+    // eslint-disable-next-line no-new-func
+    const result = Function(`"use strict"; return (${sanitized})`)();
+    if (typeof result !== "number" || !isFinite(result)) return "Math ERROR";
+    return String(Number(result.toPrecision(12)));
+  } catch {
+    return "Syntax ERROR";
+  }
 }
 
 function Index() {
-  return <PlaceholderIndex />;
+  const [expr, setExpr] = useState("");
+  const [result, setResult] = useState("");
+  const [ans, setAns] = useState("0");
+
+  const press = (v: string) => {
+    if (v === "AC") { setExpr(""); setResult(""); return; }
+    if (v === "DEL") { setExpr((e) => e.slice(0, -1)); return; }
+    if (v === "=") {
+      const r = evalExpr(expr);
+      setResult(r);
+      if (!r.includes("ERROR")) setAns(r);
+      return;
+    }
+    if (v === "ANS") { setExpr((e) => e + ans); return; }
+    if (v === "E") { setExpr((e) => e + "*10**"); return; }
+    setExpr((e) => (result && !"+-*/.".includes(v) ? v : (result ? "" : e) + v));
+    if (result) setResult("");
+  };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const k = e.key;
+      if (/^[0-9]$/.test(k)) press(k);
+      else if ("+-*/.".includes(k)) press(k);
+      else if (k === "Enter" || k === "=") { e.preventDefault(); press("="); }
+      else if (k === "Backspace") press("DEL");
+      else if (k === "Escape") press("AC");
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [expr, result, ans]);
+
+  return (
+    <main className="flex min-h-screen items-center justify-center bg-neutral-200 p-4">
+      <h1 className="sr-only">Casio fx-991ES PLUS Calculator</h1>
+      <div
+        className="relative select-none"
+        style={{
+          width: "min(420px, 95vh * 1024 / 1536)",
+          aspectRatio: "1024 / 1536",
+        }}
+      >
+        <img
+          src={casioImg}
+          alt="Casio fx-991ES PLUS calculator"
+          className="absolute inset-0 h-full w-full object-contain pointer-events-none"
+          draggable={false}
+        />
+
+        {/* LCD overlay */}
+        <div
+          className="absolute flex flex-col justify-between font-mono text-right"
+          style={{
+            left: "8.5%", top: "14.2%", width: "83%", height: "15.5%",
+            padding: "2% 3%",
+            color: "#1a1a1a",
+          }}
+        >
+          <div
+            className="truncate opacity-90"
+            style={{ fontSize: "clamp(10px, 2.6cqw, 18px)", letterSpacing: "0.02em" }}
+          >
+            {expr || "\u00A0"}
+          </div>
+          <div
+            className="truncate font-semibold tabular-nums"
+            style={{ fontSize: "clamp(16px, 5cqw, 34px)" }}
+          >
+            {result || (expr ? "" : "0")}
+          </div>
+        </div>
+
+        {/* Clickable buttons */}
+        {BTNS.map((b) => (
+          <button
+            key={b.v + b.l + b.t}
+            onClick={() => press(b.v)}
+            aria-label={b.v}
+            className="absolute rounded-md transition-all active:scale-95 active:bg-black/15 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+            style={{
+              left: `${b.l}%`, top: `${b.t}%`,
+              width: `${b.w}%`, height: `${b.h}%`,
+            }}
+          />
+        ))}
+      </div>
+    </main>
+  );
 }
