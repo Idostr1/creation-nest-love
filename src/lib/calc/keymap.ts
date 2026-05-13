@@ -1,6 +1,9 @@
 // Single source of truth for every button on the calculator face.
 // Coordinates are percentages of the calculator image (l=left, t=top, w/h).
 // Each key has a base action and optional SHIFT / ALPHA secondary actions.
+//
+// Image size: 717 x 1488 px.
+// All percentages: l/w are % of 717px width, t/h are % of 1488px height.
 
 export type KeyDef = {
   id: string;
@@ -10,93 +13,119 @@ export type KeyDef = {
   l: number; t: number; w: number; h: number;
 };
 
-// ---- numpad geometry (5 cols x 4 rows) ----
-const NW = 13.6;
-const NH = 4.5;
-const NCOL = [9.6, 26.5, 43.2, 60.0, 76.6];
-const NROW = [68.3, 75.3, 82.3, 89.4];
+// Helper: pixel coords → percentage
+const px = (x: number) => +(x / 717 * 100).toFixed(2);
+const py = (y: number) => +(y / 1488 * 100).toFixed(2);
 
-// ---- sci pad geometry (6 cols x 3 rows) ----
-const SW = 11.7;
-const SH = 3.9;
-const SCOL = [9.0, 22.7, 36.7, 50.7, 64.7, 78.5];
+// ============================================================
+// ROW 1: SHIFT  ALPHA  [D-pad]  MODE  ON
+// These sit just below the screen, roughly y=410..490
+// ============================================================
+const R1_T  = py(415);
+const R1_H  = py(75);
+const R1_W  = px(115);
 
-// ---- top row geometry ----
-const TW = 8.3;
-const TH = 4.5;
+// D-pad center: x≈340, y≈450
+// Each arrow zone is offset from center
+const DP_CX = px(340);
+const DP_CY = py(450);
+const DP_W  = px(68);
+const DP_H  = py(45);
 
-// ---- replay pad ----
-const RPL = { l: 43.5, t: 33.5, w: 6.5, h: 3.0 }; // up
-const RPD = { l: 43.5, t: 38.5, w: 6.5, h: 3.0 }; // down
-const RPLL = { l: 37.0, t: 36.0, w: 6.5, h: 3.0 }; // left
-const RPLR = { l: 50.0, t: 36.0, w: 6.5, h: 3.0 }; // right
+// ============================================================
+// ROW 2: CALC / CONV / ... (small secondary buttons)
+// y≈500..560 — these exist on the real calculator but aren't
+// functionally mapped; we skip them.
+// ============================================================
+
+// ============================================================
+// SCI PAD: 6 cols × 3 rows
+// Col left edges (px): 42, 163, 284, 404, 525, 646
+// Row top edges  (px): 580, 655, 730
+// Button size approx: 110 × 60 px
+// ============================================================
+const SP_W = px(108);
+const SP_H = py(58);
+const SP_COL = [42, 163, 284, 404, 525, 646].map(px);
+const SP_ROW = [580, 656, 731].map(py);
+
+// ============================================================
+// NUMPAD: 5 cols × 4 rows
+// Col left edges (px): 33, 175, 316, 458, 600
+// Row top edges  (px): 820, 960, 1098, 1237
+// Button size approx: 125 × 115 px
+// ============================================================
+const NP_W = px(125);
+const NP_H = py(115);
+const NP_COL = [33, 175, 316, 458, 600].map(px);
+const NP_ROW = [820, 960, 1098, 1237].map(py);
 
 export const KEYS: KeyDef[] = [
-  // ---- top row ----
-  { id: "SHIFT", base: "SHIFT",  l: 9.0,  t: 35.0, w: TW, h: TH },
-  { id: "ALPHA", base: "ALPHA",  l: 22.7, t: 35.0, w: TW, h: TH },
-  { id: "UP",    base: "UP",     ...RPL },
-  { id: "DOWN",  base: "DOWN",   ...RPD },
-  { id: "LEFT",  base: "LEFT",   ...RPLL },
-  { id: "RIGHT", base: "RIGHT",  ...RPLR },
-  { id: "MODE",  base: "MODE",   shift: "SETUP", l: 64.7, t: 35.0, w: TW, h: TH },
-  { id: "ON",    base: "ON",                     l: 78.5, t: 35.0, w: TW, h: TH },
+  // ── Row 1 ───────────────────────────────────────────────────
+  { id: "SHIFT", base: "SHIFT",          l: px(42),  t: R1_T, w: R1_W, h: R1_H },
+  { id: "ALPHA", base: "ALPHA",          l: px(163), t: R1_T, w: R1_W, h: R1_H },
+  // D-pad arrows
+  { id: "UP",    base: "UP",    l: DP_CX - DP_W/2, t: DP_CY - DP_H*2.1, w: DP_W, h: DP_H },
+  { id: "DOWN",  base: "DOWN",  l: DP_CX - DP_W/2, t: DP_CY + DP_H*1.1, w: DP_W, h: DP_H },
+  { id: "LEFT",  base: "LEFT",  l: DP_CX - DP_W*2.1, t: DP_CY - DP_H/2, w: DP_W, h: DP_H },
+  { id: "RIGHT", base: "RIGHT", l: DP_CX + DP_W*1.1, t: DP_CY - DP_H/2, w: DP_W, h: DP_H },
+  { id: "MODE",  base: "MODE",  shift: "SETUP", l: px(404), t: R1_T, w: R1_W, h: R1_H },
+  { id: "ON",    base: "ON",                    l: px(560), t: R1_T, w: px(115), h: R1_H },
 
-  // ---- sci row 1 (t=49.8) : √  x²  x⁻¹  x³  log  ln ----
-  { id: "SQRT", base: "SQRT",  shift: "CBRT",        l: SCOL[0], t: 49.8, w: SW, h: SH },
-  { id: "SQ",   base: "SQ",    shift: "POW_PROMPT",  l: SCOL[1], t: 49.8, w: SW, h: SH },
-  { id: "INV",  base: "INV",   shift: "FACT",        l: SCOL[2], t: 49.8, w: SW, h: SH },
-  { id: "CUBE", base: "CUBE",  shift: "POW",         l: SCOL[3], t: 49.8, w: SW, h: SH },
-  { id: "LOG",  base: "LOG",   shift: "POW10",       l: SCOL[4], t: 49.8, w: SW, h: SH },
-  { id: "LN",   base: "LN",    shift: "POWE",        l: SCOL[5], t: 49.8, w: SW, h: SH },
+  // ── Sci row A : √x  x²  x⁻¹  10^x  log  ln ─────────────────
+  { id: "SQRT", base: "SQRT",  shift: "CBRT",        l: SP_COL[0], t: SP_ROW[0], w: SP_W, h: SP_H },
+  { id: "SQ",   base: "SQ",    shift: "POW_PROMPT",  l: SP_COL[1], t: SP_ROW[0], w: SP_W, h: SP_H },
+  { id: "INV",  base: "INV",   shift: "FACT",         l: SP_COL[2], t: SP_ROW[0], w: SP_W, h: SP_H },
+  { id: "CUBE", base: "CUBE",  shift: "POW",          l: SP_COL[3], t: SP_ROW[0], w: SP_W, h: SP_H },
+  { id: "LOG",  base: "LOG",   shift: "POW10",        l: SP_COL[4], t: SP_ROW[0], w: SP_W, h: SP_H },
+  { id: "LN",   base: "LN",    shift: "POWE",         l: SP_COL[5], t: SP_ROW[0], w: SP_W, h: SP_H },
 
-  // ---- sci row 2 (t=55.8) : (-)  ° ' "   hyp  sin  cos  tan ----
-  { id: "NEG", base: "NEG",                              alpha: "VAR_A", l: SCOL[0], t: 55.8, w: SW, h: SH },
-  { id: "DMS", base: "DMS",                              alpha: "VAR_B", l: SCOL[1], t: 55.8, w: SW, h: SH },
-  { id: "HYP", base: "HYP",                                              l: SCOL[2], t: 55.8, w: SW, h: SH },
-  { id: "SIN", base: "SIN",   shift: "ASIN",            alpha: "VAR_C", l: SCOL[3], t: 55.8, w: SW, h: SH },
-  { id: "COS", base: "COS",   shift: "ACOS",            alpha: "VAR_D", l: SCOL[4], t: 55.8, w: SW, h: SH },
-  { id: "TAN", base: "TAN",   shift: "ATAN",            alpha: "VAR_E", l: SCOL[5], t: 55.8, w: SW, h: SH },
+  // ── Sci row B : (-)  °'"  hyp  sin  cos  tan ────────────────
+  { id: "NEG",  base: "NEG",                           alpha: "VAR_A", l: SP_COL[0], t: SP_ROW[1], w: SP_W, h: SP_H },
+  { id: "DMS",  base: "DMS",                           alpha: "VAR_B", l: SP_COL[1], t: SP_ROW[1], w: SP_W, h: SP_H },
+  { id: "HYP",  base: "HYP",                                           l: SP_COL[2], t: SP_ROW[1], w: SP_W, h: SP_H },
+  { id: "SIN",  base: "SIN",   shift: "ASIN",          alpha: "VAR_C", l: SP_COL[3], t: SP_ROW[1], w: SP_W, h: SP_H },
+  { id: "COS",  base: "COS",   shift: "ACOS",          alpha: "VAR_D", l: SP_COL[4], t: SP_ROW[1], w: SP_W, h: SP_H },
+  { id: "TAN",  base: "TAN",   shift: "ATAN",          alpha: "VAR_E", l: SP_COL[5], t: SP_ROW[1], w: SP_W, h: SP_H },
 
-  // ---- sci row 3 (t=61.4) : RCL  ENG  (  )  S⇔D  M+ ----
-  { id: "RCL",  base: "RCL", shift: "STO",   l: SCOL[0], t: 61.4, w: SW, h: SH },
-  { id: "ENG",  base: "ENG",                 l: SCOL[1], t: 61.4, w: SW, h: SH },
-  { id: "LP",   base: "LP",  shift: "PCT",   l: SCOL[2], t: 61.4, w: SW, h: SH },
-  { id: "RP",   base: "RP",  shift: "COMMA", l: SCOL[3], t: 61.4, w: SW, h: SH },
-  { id: "SD",   base: "SD",                  l: SCOL[4], t: 61.4, w: SW, h: SH },
-  { id: "MPLUS",base: "MPLUS", shift: "MMINUS", alpha: "VAR_M", l: SCOL[5], t: 61.4, w: SW, h: SH },
+  // ── Sci row C : RCL  ENG  (  )  S⇔D  M+ ────────────────────
+  { id: "RCL",   base: "RCL",   shift: "STO",                     l: SP_COL[0], t: SP_ROW[2], w: SP_W, h: SP_H },
+  { id: "ENG",   base: "ENG",                                      l: SP_COL[1], t: SP_ROW[2], w: SP_W, h: SP_H },
+  { id: "LP",    base: "LP",    shift: "PCT",                      l: SP_COL[2], t: SP_ROW[2], w: SP_W, h: SP_H },
+  { id: "RP",    base: "RP",    shift: "COMMA",                    l: SP_COL[3], t: SP_ROW[2], w: SP_W, h: SP_H },
+  { id: "SD",    base: "SD",                                       l: SP_COL[4], t: SP_ROW[2], w: SP_W, h: SP_H },
+  { id: "MPLUS", base: "MPLUS", shift: "MMINUS", alpha: "VAR_M",  l: SP_COL[5], t: SP_ROW[2], w: SP_W, h: SP_H },
 
-  // ---- numpad row 1 (t=68.3) : 7 8 9 DEL AC ----
-  { id: "D7",  base: "D7",  shift: "NPR",        l: NCOL[0], t: NROW[0], w: NW, h: NH },
-  { id: "D8",  base: "D8",  shift: "NCR",        l: NCOL[1], t: NROW[0], w: NW, h: NH },
-  { id: "D9",  base: "D9",                       l: NCOL[2], t: NROW[0], w: NW, h: NH },
-  { id: "DEL", base: "DEL", shift: "INS",        l: NCOL[3], t: NROW[0], w: NW, h: NH },
-  { id: "AC",  base: "AC",  shift: "OFF",        l: NCOL[4], t: NROW[0], w: NW, h: NH },
+  // ── Numpad row 1 : 7  8  9  DEL  AC ────────────────────────
+  { id: "D7",  base: "D7",  shift: "NPR",  l: NP_COL[0], t: NP_ROW[0], w: NP_W, h: NP_H },
+  { id: "D8",  base: "D8",  shift: "NCR",  l: NP_COL[1], t: NP_ROW[0], w: NP_W, h: NP_H },
+  { id: "D9",  base: "D9",                 l: NP_COL[2], t: NP_ROW[0], w: NP_W, h: NP_H },
+  { id: "DEL", base: "DEL", shift: "INS",  l: NP_COL[3], t: NP_ROW[0], w: NP_W, h: NP_H },
+  { id: "AC",  base: "AC",  shift: "OFF",  l: NP_COL[4], t: NP_ROW[0], w: NP_W, h: NP_H },
 
-  // ---- numpad row 2 (t=75.3) : 4 5 6 × ÷ ----
-  { id: "D4",  base: "D4",                                       l: NCOL[0], t: NROW[1], w: NW, h: NH },
-  { id: "D5",  base: "D5",                                       l: NCOL[1], t: NROW[1], w: NW, h: NH },
-  { id: "D6",  base: "D6",                                       l: NCOL[2], t: NROW[1], w: NW, h: NH },
-  { id: "MUL", base: "MUL",                                      l: NCOL[3], t: NROW[1], w: NW, h: NH },
-  { id: "DIV", base: "DIV", alpha: "VAR_F",                      l: NCOL[4], t: NROW[1], w: NW, h: NH },
+  // ── Numpad row 2 : 4  5  6  ×  ÷ ───────────────────────────
+  { id: "D4",  base: "D4",                  l: NP_COL[0], t: NP_ROW[1], w: NP_W, h: NP_H },
+  { id: "D5",  base: "D5",                  l: NP_COL[1], t: NP_ROW[1], w: NP_W, h: NP_H },
+  { id: "D6",  base: "D6",                  l: NP_COL[2], t: NP_ROW[1], w: NP_W, h: NP_H },
+  { id: "MUL", base: "MUL",                 l: NP_COL[3], t: NP_ROW[1], w: NP_W, h: NP_H },
+  { id: "DIV", base: "DIV", alpha: "VAR_F", l: NP_COL[4], t: NP_ROW[1], w: NP_W, h: NP_H },
 
-  // ---- numpad row 3 (t=82.3) : 1 2 3 + - ----
-  { id: "D1",  base: "D1",                       l: NCOL[0], t: NROW[2], w: NW, h: NH },
-  { id: "D2",  base: "D2",                       l: NCOL[1], t: NROW[2], w: NW, h: NH },
-  { id: "D3",  base: "D3",                       l: NCOL[2], t: NROW[2], w: NW, h: NH },
-  { id: "ADD", base: "ADD", shift: "ABS",        l: NCOL[3], t: NROW[2], w: NW, h: NH },
-  { id: "SUB", base: "SUB",                      l: NCOL[4], t: NROW[2], w: NW, h: NH },
+  // ── Numpad row 3 : 1  2  3  +  − ───────────────────────────
+  { id: "D1",  base: "D1",                l: NP_COL[0], t: NP_ROW[2], w: NP_W, h: NP_H },
+  { id: "D2",  base: "D2",                l: NP_COL[1], t: NP_ROW[2], w: NP_W, h: NP_H },
+  { id: "D3",  base: "D3",                l: NP_COL[2], t: NP_ROW[2], w: NP_W, h: NP_H },
+  { id: "ADD", base: "ADD", shift: "ABS", l: NP_COL[3], t: NP_ROW[2], w: NP_W, h: NP_H },
+  { id: "SUB", base: "SUB",               l: NP_COL[4], t: NP_ROW[2], w: NP_W, h: NP_H },
 
-  // ---- numpad row 4 (t=89.4) : 0 . EXP Ans = ----
-  { id: "D0",  base: "D0",                       l: NCOL[0], t: NROW[3], w: NW, h: NH },
-  { id: "DOT", base: "DOT",                      l: NCOL[1], t: NROW[3], w: NW, h: NH },
-  { id: "EXP", base: "EXP", shift: "PI",         l: NCOL[2], t: NROW[3], w: NW, h: NH },
-  { id: "ANS", base: "ANS", shift: "EULER",      alpha: "VAR_X", l: NCOL[3], t: NROW[3], w: NW, h: NH },
-  { id: "EQ",  base: "EQ",                       alpha: "VAR_Y", l: NCOL[4], t: NROW[3], w: NW, h: NH },
+  // ── Numpad row 4 : 0  .  ×10^  Ans  = ──────────────────────
+  { id: "D0",  base: "D0",                              l: NP_COL[0], t: NP_ROW[3], w: NP_W, h: NP_H },
+  { id: "DOT", base: "DOT",                             l: NP_COL[1], t: NP_ROW[3], w: NP_W, h: NP_H },
+  { id: "EXP", base: "EXP", shift: "PI",                l: NP_COL[2], t: NP_ROW[3], w: NP_W, h: NP_H },
+  { id: "ANS", base: "ANS", shift: "EULER", alpha: "VAR_X", l: NP_COL[3], t: NP_ROW[3], w: NP_W, h: NP_H },
+  { id: "EQ",  base: "EQ",                 alpha: "VAR_Y", l: NP_COL[4], t: NP_ROW[3], w: NP_W, h: NP_H },
 ];
 
 // What text to insert into the visible expression for each action id.
-// Empty = handled specially (modifiers, =, AC, navigation, menu, etc.)
 export const INSERT: Record<string, string> = {
   D0: "0", D1: "1", D2: "2", D3: "3", D4: "4",
   D5: "5", D6: "6", D7: "7", D8: "8", D9: "9",
