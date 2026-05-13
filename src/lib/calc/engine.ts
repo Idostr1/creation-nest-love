@@ -120,7 +120,11 @@ export function evalExpr(
 }
 
 // Solve quadratic ax² + bx + c = 0
-export function solveQuadratic(a: number, b: number, c: number) {
+export type QuadResult =
+  | { complex: false; x1: number; x2: number }
+  | { complex: true; x1: { re: number; im: number }; x2: { re: number; im: number } };
+
+export function solveQuadratic(a: number, b: number, c: number): QuadResult | null {
   if (a === 0) return null;
   const d = b * b - 4 * a * c;
   if (d < 0) {
