@@ -18,59 +18,41 @@ const px = (x: number) => +(x / 717 * 100).toFixed(2);
 const py = (y: number) => +(y / 1488 * 100).toFixed(2);
 
 // ============================================================
-// ROW 1: SHIFT  ALPHA  [D-pad]  MODE  ON
-// These sit just below the screen, roughly y=410..490
+// ROW 1: SHIFT  ALPHA  [D-pad]  MODE  ON  (round buttons just below screen)
 // ============================================================
-const R1_T  = py(415);
-const R1_H  = py(75);
-const R1_W  = px(115);
+const R1_T  = py(540);
+const R1_H  = py(70);
+const R1_W  = px(90);
 
-// D-pad center: x≈340, y≈450
-// Each arrow zone is offset from center
-const DP_CX = px(340);
-const DP_CY = py(450);
-const DP_W  = px(68);
-const DP_H  = py(45);
+// D-pad center
+const DP_CX = px(358);
+const DP_CY = py(620);
+const DP_W  = px(62);
+const DP_H  = py(42);
 
-// ============================================================
-// ROW 2: CALC / CONV / ... (small secondary buttons)
-// y≈500..560 — these exist on the real calculator but aren't
-// functionally mapped; we skip them.
-// ============================================================
+// SCI PAD: 6 cols × 3 rows (rectangular buttons)
+const SP_W = px(95);
+const SP_H = py(60);
+const SP_COL = [50, 152, 253, 355, 457, 558].map(px);
+const SP_ROW = [740, 815, 890].map(py);
 
-// ============================================================
-// SCI PAD: 6 cols × 3 rows
-// Col left edges (px): 42, 163, 284, 404, 525, 646
-// Row top edges  (px): 580, 655, 730
-// Button size approx: 110 × 60 px
-// ============================================================
-const SP_W = px(108);
-const SP_H = py(58);
-const SP_COL = [42, 163, 284, 404, 525, 646].map(px);
-const SP_ROW = [580, 656, 731].map(py);
-
-// ============================================================
 // NUMPAD: 5 cols × 4 rows
-// Col left edges (px): 33, 175, 316, 458, 600
-// Row top edges  (px): 820, 960, 1098, 1237
-// Button size approx: 125 × 115 px
-// ============================================================
-const NP_W = px(125);
-const NP_H = py(115);
-const NP_COL = [33, 175, 316, 458, 600].map(px);
-const NP_ROW = [820, 960, 1098, 1237].map(py);
+const NP_W = px(115);
+const NP_H = py(82);
+const NP_COL = [48, 183, 318, 453, 588].map(px);
+const NP_ROW = [985, 1075, 1163, 1250].map(py);
 
 export const KEYS: KeyDef[] = [
   // ── Row 1 ───────────────────────────────────────────────────
-  { id: "SHIFT", base: "SHIFT",          l: px(42),  t: R1_T, w: R1_W, h: R1_H },
-  { id: "ALPHA", base: "ALPHA",          l: px(163), t: R1_T, w: R1_W, h: R1_H },
+  { id: "SHIFT", base: "SHIFT",          l: px(60),  t: R1_T, w: R1_W, h: R1_H },
+  { id: "ALPHA", base: "ALPHA",          l: px(170), t: R1_T, w: R1_W, h: R1_H },
   // D-pad arrows
   { id: "UP",    base: "UP",    l: DP_CX - DP_W/2, t: DP_CY - DP_H*2.1, w: DP_W, h: DP_H },
   { id: "DOWN",  base: "DOWN",  l: DP_CX - DP_W/2, t: DP_CY + DP_H*1.1, w: DP_W, h: DP_H },
   { id: "LEFT",  base: "LEFT",  l: DP_CX - DP_W*2.1, t: DP_CY - DP_H/2, w: DP_W, h: DP_H },
   { id: "RIGHT", base: "RIGHT", l: DP_CX + DP_W*1.1, t: DP_CY - DP_H/2, w: DP_W, h: DP_H },
-  { id: "MODE",  base: "MODE",  shift: "SETUP", l: px(404), t: R1_T, w: R1_W, h: R1_H },
-  { id: "ON",    base: "ON",                    l: px(560), t: R1_T, w: px(115), h: R1_H },
+  { id: "MODE",  base: "MODE",  shift: "SETUP", l: px(478), t: R1_T, w: R1_W, h: R1_H },
+  { id: "ON",    base: "ON",                    l: px(585), t: R1_T, w: R1_W, h: R1_H },
 
   // ── Sci row A : √x  x²  x⁻¹  10^x  log  ln ─────────────────
   { id: "SQRT", base: "SQRT",  shift: "CBRT",        l: SP_COL[0], t: SP_ROW[0], w: SP_W, h: SP_H },
@@ -131,7 +113,7 @@ export const INSERT: Record<string, string> = {
   D5: "5", D6: "6", D7: "7", D8: "8", D9: "9",
   DOT: ".", ADD: "+", SUB: "-", MUL: "×", DIV: "÷",
   LP: "(", RP: ")", COMMA: ",",
-  EXP: "×10^", PI: "π", EULER: "e", ANS: "Ans", NEG: "-",
+  EXP: "×10^", PI: "π", EULER: "e", ANS: "Ans", NEG: "(-",
   SQRT: "√(", CBRT: "∛(", SQ: "²", CUBE: "³", INV: "⁻¹",
   POW: "^", POW_PROMPT: "^(",
   LOG: "log(", LN: "ln(", POW10: "10^(", POWE: "e^(",
@@ -144,16 +126,52 @@ export const INSERT: Record<string, string> = {
   VAR_F: "F", VAR_X: "X", VAR_Y: "Y", VAR_M: "M",
 };
 
+// Wrap the operand directly preceding `idx` in parens, then append `suffix`.
+// Walks backward over a number, identifier, or balanced parenthesised group.
+function wrapPreceding(s: string, idx: number, suffix: string): string {
+  let j = idx - 1;
+  if (j < 0) return s.slice(0, idx) + suffix + s.slice(idx + 1);
+  if (s[j] === ")") {
+    let depth = 1; j--;
+    while (j >= 0 && depth > 0) {
+      if (s[j] === ")") depth++;
+      else if (s[j] === "(") depth--;
+      if (depth === 0) break;
+      j--;
+    }
+    // include any function name immediately before the (
+    let k = j - 1;
+    while (k >= 0 && /[A-Za-z]/.test(s[k])) k--;
+    j = k + 1;
+  } else {
+    while (j >= 0 && /[A-Za-z0-9_.]/.test(s[j])) j--;
+    j++;
+  }
+  const operand = s.slice(j, idx);
+  return s.slice(0, j) + "(" + operand + ")" + suffix + s.slice(idx + 1);
+}
+
 // Convert visible-expression token stream to engine-evaluable string.
 export function displayToEval(disp: string): string {
-  return disp
+  let s = disp
     .replace(/×10\^/g, "*10^")
     .replace(/×/g, "*")
     .replace(/÷/g, "/")
     .replace(/π/g, "pi")
     .replace(/√\(/g, "sqrt(")
-    .replace(/∛\(/g, "cbrt(")
-    .replace(/⁻¹/g, "^(-1)")
-    .replace(/²/g, "^2")
-    .replace(/³/g, "^3");
+    .replace(/∛\(/g, "cbrt(");
+  // Postfix superscripts: scan left→right and wrap the preceding operand.
+  // Each pass handles one occurrence; the wrap consumes the marker so we
+  // don't re-match it.
+  const handle = (marker: string, suffix: string) => {
+    while (true) {
+      const i = s.indexOf(marker);
+      if (i < 0) return;
+      s = wrapPreceding(s, i, suffix);
+    }
+  };
+  handle("⁻¹", "^(-1)");
+  handle("²", "^2");
+  handle("³", "^3");
+  return s;
 }

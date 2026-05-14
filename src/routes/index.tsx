@@ -428,26 +428,28 @@ function Index() {
     }
     if (menu?.kind === "PROMPT") {
       return (
-        <>
-          <div style={{ fontSize: "3.4cqw", lineHeight: 1.2, opacity: 0.8 }}>
+        <div className="flex flex-col h-full" style={{ paddingTop: "0.4cqw" }}>
+          <div className="text-center" style={{ fontSize: "3.4cqw", lineHeight: 1.2, opacity: 0.8 }}>
             {menu.title}  ({menu.idx + 1}/{menu.steps.length})
           </div>
-          <div style={{ fontSize: "5cqw", lineHeight: 1.2, marginTop: "0.6cqw" }}>
+          <div className="text-center" style={{ fontSize: "5cqw", lineHeight: 1.2, marginTop: "0.6cqw" }}>
             {menu.steps[menu.idx]}
           </div>
           <div className="mt-auto truncate text-right tabular-nums" style={{ fontSize: "9cqw", lineHeight: 1 }}>
             {expr || "0"}
           </div>
-        </>
+        </div>
       );
     }
     if (menu?.kind === "RESULT") {
       return (
-        <div style={{ fontSize: "3.4cqw", lineHeight: 1.25, overflow: "hidden" }}>
-          {menu.lines.slice(0, 5).map((l, i) => (
-            <div key={i} className="font-mono whitespace-pre">{l}</div>
-          ))}
-          <div className="opacity-60" style={{ fontSize: "2.6cqw" }}>AC to exit</div>
+        <div className="flex flex-col items-center justify-center h-full" style={{ fontSize: "3.4cqw", lineHeight: 1.3, overflow: "hidden" }}>
+          <div>
+            {menu.lines.slice(0, 5).map((l, i) => (
+              <div key={i} className="font-mono whitespace-pre">{l}</div>
+            ))}
+          </div>
+          <div className="opacity-60 mt-1" style={{ fontSize: "2.6cqw" }}>AC to exit</div>
         </div>
       );
     }
@@ -544,11 +546,11 @@ function Index() {
 
 function MenuView({ title, opts }: { title: string; opts: string[] }) {
   return (
-    <div style={{ marginTop: "0.6cqw" }}>
-      {title && <div style={{ fontSize: "3cqw", opacity: 0.7 }}>{title}</div>}
+    <div className="flex flex-col items-center justify-center h-full w-full">
+      {title && <div className="text-center" style={{ fontSize: "3cqw", opacity: 0.7, marginBottom: "0.6cqw" }}>{title}</div>}
       <div
-        className="grid grid-cols-2"
-        style={{ fontSize: "3.6cqw", lineHeight: 1.25, columnGap: "1.5cqw" }}
+        className="grid grid-cols-2 mx-auto"
+        style={{ fontSize: "4cqw", lineHeight: 1.4, columnGap: "4cqw", rowGap: "0.2cqw" }}
       >
         {opts.map((o) => (
           <div key={o} className="font-mono">{o}</div>

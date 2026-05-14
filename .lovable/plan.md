@@ -1,97 +1,67 @@
 
-# Plan: Full Casio fx-991ES PLUS Calculator
+# Plan — Make every key land on its real button, center the menus, fix the math
 
-Goal: turn the current partial overlay into a complete, working scientific calculator with menu modes, SHIFT/ALPHA secondary functions, arrow navigation, and pixel-accurate button hit-zones.
+Three focused passes, all in existing files. No new architecture.
 
-## Phase 1 — Complete the keypad (every physical button)
+## 1. Re-calibrate every hit-zone against `casio.png`
 
-Add the missing buttons so all 47 keys exist as click zones. Each key gets a primary value, a SHIFT value (yellow label), and an ALPHA value (red label), driven by current modifier state.
+Current `keymap.ts` uses guessed pixel offsets; the arrow pad and several rows are visibly off. Fix by measuring the real image once and rewriting only the coordinate constants.
 
-Keys to add that are currently missing:
-- Top row: REPLAY pad (▲ ▼ ◄ ►), ON
-- Function rows: x⁻¹, x³, RCL, ENG, S⇔D, M+, hyp, °'″, comma
-- All SHIFT secondaries (x!, nPr, nCr, %, π, e, Pol, Rec, ∫, d/dx, Σ, Π, abs, etc.)
-- All ALPHA letters (A–F, X, Y, M, etc.) for variable storage
+Steps:
+- Open the preview with `?debug=1` (already supported) so every hit-zone shows as a translucent box.
+- Take a screenshot and crop/zoom each region (D-pad, SHIFT/ALPHA row, sci pad rows A/B/C, numpad rows 1–4) to read true pixel positions on the 717×1488 source.
+- Update only the constants in `src/lib/calc/keymap.ts`:
+  - `R1_T`, `R1_H`, `R1_W` (top row)
+  - `DP_CX`, `DP_CY`, `DP_W`, `DP_H` (D-pad — the most broken)
+  - `SP_COL[]`, `SP_ROW[]`, `SP_W`, `SP_H` (sci pad)
+  - `NP_COL[]`, `NP_ROW[]`, `NP_W`, `NP_H` (numpad)
+- Verify by re-screenshotting with `?debug=1` and confirming each colored box sits on its physical key (especially ▲ ▼ ◄ ►, MODE, ON, REPLAY).
 
-## Phase 2 — Modifier-aware press handler
+No structural changes to the `KEYS` array — same ids, just better geometry.
 
-Refactor `press(v)` so each button looks up its action from a table:
-```
-{ base: "7", shift: "nPr", alpha: "D" }
-```
-The active label is chosen by `shift`/`alpha` state, then consumed (modifier resets after one press, matching real hardware).
+## 2. Center the LCD menus and prompts
 
-Status row on LCD shows `S` / `A` indicators when active.
+In `src/routes/index.tsx` the `MenuView` / prompt / result blocks are top-left aligned inside the LCD box, so MODE / SETUP / EQN / TABLE prompts sit in the corner instead of filling the screen.
 
-## Phase 3 — Mode / Setup menus
+Changes (all in `renderLcd` and `MenuView`, no logic changes):
+- Wrap each menu render in a flex container with `justifyContent: center`, `alignItems: stretch`, and a small inner grid for the 2-column option lists.
+- For `MAIN` / `SETUP` / `EQN`: render as a 2-column grid centered horizontally, options vertically centered, with a small title row.
+- For `PROMPT`: center the title; right-align the input value with proper baseline; keep the cursor.
+- For `RESULT`: center the block vertically, keep monospace lines left-aligned within a centered column.
+- Sizes: bump font to fill the LCD evenly (use `cqw` as today, just rebalanced).
 
-Pressing **MODE** opens an overlay menu rendered inside the LCD area:
-```
-1:COMP  2:CMPLX
-3:STAT  4:BASE-N
-5:EQN   6:MATRIX
-7:TABLE 8:VECTOR
-```
-Pressing **SHIFT → MODE** (SETUP) opens:
-```
-1:MthIO 2:LineIO
-3:Deg   4:Rad   5:Gra
-6:Fix   7:Sci   8:Norm
-…
-```
-A number key while a menu is open selects that entry; AC closes it.
+## 3. Fix broken math in the engine and display→eval translation
 
-EQN submenu offers quadratic/cubic and 2/3-var linear systems. TABLE prompts for f(X), Start, End, Step. Each mode sets a `currentMode` state that changes how the engine evaluates input.
+Real bugs in `src/lib/calc/engine.ts` + `src/lib/calc/keymap.ts`:
 
-## Phase 4 — Arrow keys & cursor
+- `√(` works but **closing paren is optional on real units** like `√9` typed without `)`. Auto-close trailing open parens before evaluation.
+- `²` and `³` are translated to `^2` / `^3`, but they bind to the *next* token, not the previous one. e.g. `3² ` becomes `3^2` ✓ but `(1+2)²` becomes `(1+2)^2` ✓ — however `sin(30)²` currently breaks. Replace the regex translation with a small token walk that wraps the *previous* number/parenthesised group: `X²` → `(X)^2`, `X³` → `(X)^3`, `X⁻¹` → `(X)^(-1)`.
+- `INV` (`x⁻¹`) currently inserts the literal `⁻¹` character; with the fix above it will evaluate correctly.
+- `CBRT` inserts `∛(` and `displayToEval` maps it to `cbrt(` ✓ — keep, but also auto-close.
+- `POW_PROMPT` (SHIFT+x²) inserts `^(` — fine, just confirm it evaluates after auto-close.
+- `EXP` inserts `×10^` → eval becomes `*10^`; needs implicit parens so `2×10^3+1` parses as `2*10^(3)+1` not `2*10^3+1` (which JS handles, but precedence around unary `-` breaks `×10^-3`). Translate `×10^` to `*1e` only when followed by a signed integer; otherwise `*10**`.
+- `NEG` inserts `-`; this collides with subtraction. Switch `NEG` to insert `(-` so `(-3)²` works and `-` stays as binary subtraction.
+- Factorial postfix scan in `engine.ts` only handles trailing `)` or digits — extend to also wrap a preceding variable letter (e.g. `A!`).
+- `decimalToFraction` is referenced by `SD` but not defined in the file — add a small continued-fraction implementation so S⇔D actually toggles.
+- Result chaining: when an operator is pressed after a result, current code does `replaceAll(result + text)` — fine, but `Ans` should be inserted instead so further edits remain symbolic. Change to insert `Ans` + operator.
 
-Track a `cursorPos` integer inside `expr`. ◄ / ► move it; DEL removes the char left of the cursor; new tokens insert at the cursor. ▲ / ▼ scroll through a small history stack of previous entries (replay).
+After these patches, sanity-check by typing in the preview:
+- `√9 =` → 3
+- `sin(30) =` (DEG) → 0.5
+- `(2+3)² =` → 25
+- `5! =` → 120
+- `2×10^3 =` → 2000
+- `-3² =` → -9 (matches calculator convention via `NEG` = `(-`)
+- `1÷4` then `S⇔D` toggles between `0.25` and `1/4`
 
-In menu mode, arrows move the menu highlight instead.
+## Out of scope
 
-## Phase 5 — Engine upgrades
+- Natural-display fraction/√ rendering (pretty math layout)
+- Persisting variables across reloads
+- Matrix/Vector/Stat/Base-N modes (still stubbed)
 
-Extend `evalExpr` to support: `^`, `!`, `nPr`, `nCr`, `π`, `e`, `Ans`, `%`, `°'″`, hyperbolic (`sinh/cosh/tanh`), `x⁻¹`, `x³`, fractions (`a b/c`), and variable storage (A–F, X, Y, M). Add Pol/Rec, integral and derivative (numeric), Σ and Π (loop sums).
+## Files touched
 
-Per-mode evaluators:
-- COMP: current behaviour
-- CMPLX: complex arithmetic via `{re,im}` pairs
-- BASE-N: integer math in bin/oct/dec/hex with base toggle keys
-- STAT: sample list + 1-Var / 2-Var statistics
-- EQN: solve quadratic/cubic + 2×2 / 3×3 linear systems
-- TABLE: produce table of f(X) values
-- MATRIX / VECTOR: small matrix & vector ops
-
-## Phase 6 — Hit-zone alignment
-
-Re-measure every button on the actual `casio.png` using a one-time calibration pass:
-1. Render the image at full size
-2. Click-test each zone in dev with a translucent debug overlay (toggled by `?debug=1`)
-3. Update the `BTN` table coordinates until each invisible zone sits exactly on its physical key
-
-Switch from the current ad-hoc column arrays to a single `BTNS: { v, shift, alpha, l, t, w, h }[]` array so coordinates and behaviour live together.
-
-## Phase 7 — LCD polish
-
-- Render expression with the cursor caret at `cursorPos`
-- Auto-scroll horizontally when expression exceeds line width
-- Show small mode tag (`COMP`, `CMPLX`, `STAT`, `TABLE`…) in status row
-- Show `D`/`R`/`G` for angle, `FIX`/`SCI` when set
-- Render menu overlays as a 2-column grid styled like the real screen
-
-## Technical notes
-
-- All work stays in `src/routes/index.tsx` plus new helpers in `src/lib/calc/` (engine, modes, menus, keymap)
-- Suggested files:
-  - `src/lib/calc/keymap.ts` — single source of truth for keys (label, shift, alpha, geometry)
-  - `src/lib/calc/engine.ts` — evaluator + per-mode handlers
-  - `src/lib/calc/menus.ts` — MODE / SETUP / EQN definitions
-  - `src/lib/calc/state.ts` — `useCalculator()` hook (expr, cursor, mode, vars, history, menu)
-- Debug overlay: when `?debug=1`, render each hit-zone with `outline: 1px dashed magenta` to make calibration visible
-- No backend needed; everything is client-side
-
-## Out of scope (can add later if wanted)
-
-- Natural-display fraction/√ rendering (pretty-printed math) — would need a mini layout engine
-- Saving variables across reloads
-- Complex matrix inversion beyond 3×3
+- `src/lib/calc/keymap.ts` — coordinate constants + small `INSERT` tweaks (`NEG`)
+- `src/lib/calc/engine.ts` — auto-close parens, postfix superscript handling, factorial on letters, `decimalToFraction` helper
+- `src/routes/index.tsx` — `renderLcd` / `MenuView` centering only

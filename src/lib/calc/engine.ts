@@ -41,10 +41,11 @@ export function evalExpr(
     s = s.replace(new RegExp(`\\b${k}\\b`, "g"), `(${v})`);
   }
 
+
   // Postfix ! → FACT(...): wrap the preceding number/group.
   // Simple approach: repeatedly find "<token>!" and rewrite.
   for (let i = 0; i < 50; i++) {
-    const m = s.match(/(\)|\d+(?:\.\d+)?)!/);
+    const m = s.match(/(\)|\d+(?:\.\d+)?|[A-Za-z]+)!/);
     if (!m) break;
     const idx = s.indexOf(m[0]);
     if (m[1] === ")") {
@@ -86,6 +87,14 @@ export function evalExpr(
 
   // Implicit multiplication: a number or ) followed by ( → insert *
   s = s.replace(/(\d|\))(\()/g, "$1*$2");
+
+  // Auto-close any unmatched open parens (so √9 typed as "sqrt(9" still works).
+  let opens = 0;
+  for (const ch of s) {
+    if (ch === "(") opens++;
+    else if (ch === ")") opens = Math.max(0, opens - 1);
+  }
+  if (opens > 0) s += ")".repeat(opens);
 
   // Whitelist
   if (!/^[\s0-9+\-*/().,a-zA-Z_]+$/.test(s)) return { ok: false, error: "Syntax ERROR" };
