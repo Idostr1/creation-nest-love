@@ -113,7 +113,7 @@ export const INSERT: Record<string, string> = {
   D5: "5", D6: "6", D7: "7", D8: "8", D9: "9",
   DOT: ".", ADD: "+", SUB: "-", MUL: "×", DIV: "÷",
   LP: "(", RP: ")", COMMA: ",",
-  EXP: "×10^", PI: "π", EULER: "e", ANS: "Ans", NEG: "-",
+  EXP: "×10^", PI: "π", EULER: "e", ANS: "Ans", NEG: "(-",
   SQRT: "√(", CBRT: "∛(", SQ: "²", CUBE: "³", INV: "⁻¹",
   POW: "^", POW_PROMPT: "^(",
   LOG: "log(", LN: "ln(", POW10: "10^(", POWE: "e^(",
