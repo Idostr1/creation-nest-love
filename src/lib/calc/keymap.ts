@@ -126,16 +126,52 @@ export const INSERT: Record<string, string> = {
   VAR_F: "F", VAR_X: "X", VAR_Y: "Y", VAR_M: "M",
 };
 
+// Wrap the operand directly preceding `idx` in parens, then append `suffix`.
+// Walks backward over a number, identifier, or balanced parenthesised group.
+function wrapPreceding(s: string, idx: number, suffix: string): string {
+  let j = idx - 1;
+  if (j < 0) return s.slice(0, idx) + suffix + s.slice(idx + 1);
+  if (s[j] === ")") {
+    let depth = 1; j--;
+    while (j >= 0 && depth > 0) {
+      if (s[j] === ")") depth++;
+      else if (s[j] === "(") depth--;
+      if (depth === 0) break;
+      j--;
+    }
+    // include any function name immediately before the (
+    let k = j - 1;
+    while (k >= 0 && /[A-Za-z]/.test(s[k])) k--;
+    j = k + 1;
+  } else {
+    while (j >= 0 && /[A-Za-z0-9_.]/.test(s[j])) j--;
+    j++;
+  }
+  const operand = s.slice(j, idx);
+  return s.slice(0, j) + "(" + operand + ")" + suffix + s.slice(idx + 1);
+}
+
 // Convert visible-expression token stream to engine-evaluable string.
 export function displayToEval(disp: string): string {
-  return disp
+  let s = disp
     .replace(/×10\^/g, "*10^")
     .replace(/×/g, "*")
     .replace(/÷/g, "/")
     .replace(/π/g, "pi")
     .replace(/√\(/g, "sqrt(")
-    .replace(/∛\(/g, "cbrt(")
-    .replace(/⁻¹/g, "^(-1)")
-    .replace(/²/g, "^2")
-    .replace(/³/g, "^3");
+    .replace(/∛\(/g, "cbrt(");
+  // Postfix superscripts: scan left→right and wrap the preceding operand.
+  // Each pass handles one occurrence; the wrap consumes the marker so we
+  // don't re-match it.
+  const handle = (marker: string, suffix: string) => {
+    while (true) {
+      const i = s.indexOf(marker);
+      if (i < 0) return;
+      s = wrapPreceding(s, i, suffix);
+    }
+  };
+  handle("⁻¹", "^(-1)");
+  handle("²", "^2");
+  handle("³", "^3");
+  return s;
 }
