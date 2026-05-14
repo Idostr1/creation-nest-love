@@ -41,10 +41,47 @@ export function evalExpr(
     s = s.replace(new RegExp(`\\b${k}\\b`, "g"), `(${v})`);
   }
 
+  // Postfix superscripts: rewrite "<expr>^N" where the ^N came from ², ³, ⁻¹.
+  // displayToEval already converted ²→^2, ³→^3, ⁻¹→^(-1). Wrap the preceding
+  // operand in parens so e.g. "sin(30)^2" stays correct and "5^2" still works.
+  // We do this in a small loop so chained superscripts work too.
+  const wrapPrev = (str: string, suffixRe: RegExp): string => {
+    let out = str;
+    for (let i = 0; i < 20; i++) {
+      const m = out.match(suffixRe);
+      if (!m) break;
+      const idx = m.index!;
+      // find start of preceding operand
+      let j = idx - 1;
+      if (out[j] === ")") {
+        let depth = 1; j--;
+        while (j >= 0 && depth > 0) {
+          if (out[j] === ")") depth++;
+          else if (out[j] === "(") depth--;
+          if (depth === 0) break;
+          j--;
+        }
+      } else {
+        while (j >= 0 && /[A-Za-z0-9_.]/.test(out[j])) j--;
+        j++;
+        if (j > idx - 1) j = idx - 1;
+        j = j; // start of operand
+      }
+      const operand = out.slice(j, idx);
+      const suffix = m[0];
+      out = out.slice(0, j) + "(" + operand + ")" + suffix + out.slice(idx + suffix.length);
+    }
+    return out;
+  };
+  // Order: handle ^(-1) first so it isn't broken by ^2/^3 logic
+  s = wrapPrev(s, /\^\(-1\)/);
+  s = wrapPrev(s, /\^2(?!\d)/);
+  s = wrapPrev(s, /\^3(?!\d)/);
+
   // Postfix ! → FACT(...): wrap the preceding number/group.
   // Simple approach: repeatedly find "<token>!" and rewrite.
   for (let i = 0; i < 50; i++) {
-    const m = s.match(/(\)|\d+(?:\.\d+)?)!/);
+    const m = s.match(/(\)|\d+(?:\.\d+)?|[A-Za-z]+)!/);
     if (!m) break;
     const idx = s.indexOf(m[0]);
     if (m[1] === ")") {
@@ -86,6 +123,14 @@ export function evalExpr(
 
   // Implicit multiplication: a number or ) followed by ( → insert *
   s = s.replace(/(\d|\))(\()/g, "$1*$2");
+
+  // Auto-close any unmatched open parens (so √9 typed as "sqrt(9" still works).
+  let opens = 0;
+  for (const ch of s) {
+    if (ch === "(") opens++;
+    else if (ch === ")") opens = Math.max(0, opens - 1);
+  }
+  if (opens > 0) s += ")".repeat(opens);
 
   // Whitelist
   if (!/^[\s0-9+\-*/().,a-zA-Z_]+$/.test(s)) return { ok: false, error: "Syntax ERROR" };
