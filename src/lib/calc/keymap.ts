@@ -18,47 +18,29 @@ const px = (x: number) => +(x / 717 * 100).toFixed(2);
 const py = (y: number) => +(y / 1488 * 100).toFixed(2);
 
 // ============================================================
-// ROW 1: SHIFT  ALPHA  [D-pad]  MODE  ON
-// These sit just below the screen, roughly y=410..490
+// ROW 1: SHIFT  ALPHA  [D-pad]  MODE  ON  (round buttons just below screen)
 // ============================================================
-const R1_T  = py(415);
-const R1_H  = py(75);
-const R1_W  = px(115);
+const R1_T  = py(540);
+const R1_H  = py(70);
+const R1_W  = px(90);
 
-// D-pad center: x≈340, y≈450
-// Each arrow zone is offset from center
-const DP_CX = px(340);
-const DP_CY = py(450);
-const DP_W  = px(68);
-const DP_H  = py(45);
+// D-pad center
+const DP_CX = px(358);
+const DP_CY = py(620);
+const DP_W  = px(62);
+const DP_H  = py(42);
 
-// ============================================================
-// ROW 2: CALC / CONV / ... (small secondary buttons)
-// y≈500..560 — these exist on the real calculator but aren't
-// functionally mapped; we skip them.
-// ============================================================
+// SCI PAD: 6 cols × 3 rows (rectangular buttons)
+const SP_W = px(95);
+const SP_H = py(60);
+const SP_COL = [50, 152, 253, 355, 457, 558].map(px);
+const SP_ROW = [740, 815, 890].map(py);
 
-// ============================================================
-// SCI PAD: 6 cols × 3 rows
-// Col left edges (px): 42, 163, 284, 404, 525, 646
-// Row top edges  (px): 580, 655, 730
-// Button size approx: 110 × 60 px
-// ============================================================
-const SP_W = px(108);
-const SP_H = py(58);
-const SP_COL = [42, 163, 284, 404, 525, 646].map(px);
-const SP_ROW = [580, 656, 731].map(py);
-
-// ============================================================
 // NUMPAD: 5 cols × 4 rows
-// Col left edges (px): 33, 175, 316, 458, 600
-// Row top edges  (px): 820, 960, 1098, 1237
-// Button size approx: 125 × 115 px
-// ============================================================
-const NP_W = px(125);
-const NP_H = py(115);
-const NP_COL = [33, 175, 316, 458, 600].map(px);
-const NP_ROW = [820, 960, 1098, 1237].map(py);
+const NP_W = px(115);
+const NP_H = py(82);
+const NP_COL = [48, 183, 318, 453, 588].map(px);
+const NP_ROW = [985, 1075, 1163, 1250].map(py);
 
 export const KEYS: KeyDef[] = [
   // ── Row 1 ───────────────────────────────────────────────────
@@ -70,7 +52,8 @@ export const KEYS: KeyDef[] = [
   { id: "LEFT",  base: "LEFT",  l: DP_CX - DP_W*2.1, t: DP_CY - DP_H/2, w: DP_W, h: DP_H },
   { id: "RIGHT", base: "RIGHT", l: DP_CX + DP_W*1.1, t: DP_CY - DP_H/2, w: DP_W, h: DP_H },
   { id: "MODE",  base: "MODE",  shift: "SETUP", l: px(404), t: R1_T, w: R1_W, h: R1_H },
-  { id: "ON",    base: "ON",                    l: px(560), t: R1_T, w: px(115), h: R1_H },
+  { id: "MODE",  base: "MODE",  shift: "SETUP", l: px(478), t: R1_T, w: R1_W, h: R1_H },
+  { id: "ON",    base: "ON",                    l: px(580), t: R1_T, w: R1_W, h: R1_H },
 
   // ── Sci row A : √x  x²  x⁻¹  10^x  log  ln ─────────────────
   { id: "SQRT", base: "SQRT",  shift: "CBRT",        l: SP_COL[0], t: SP_ROW[0], w: SP_W, h: SP_H },
