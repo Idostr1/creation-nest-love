@@ -44,16 +44,15 @@ const NP_ROW = [985, 1075, 1163, 1250].map(py);
 
 export const KEYS: KeyDef[] = [
   // ── Row 1 ───────────────────────────────────────────────────
-  { id: "SHIFT", base: "SHIFT",          l: px(42),  t: R1_T, w: R1_W, h: R1_H },
-  { id: "ALPHA", base: "ALPHA",          l: px(163), t: R1_T, w: R1_W, h: R1_H },
+  { id: "SHIFT", base: "SHIFT",          l: px(60),  t: R1_T, w: R1_W, h: R1_H },
+  { id: "ALPHA", base: "ALPHA",          l: px(170), t: R1_T, w: R1_W, h: R1_H },
   // D-pad arrows
   { id: "UP",    base: "UP",    l: DP_CX - DP_W/2, t: DP_CY - DP_H*2.1, w: DP_W, h: DP_H },
   { id: "DOWN",  base: "DOWN",  l: DP_CX - DP_W/2, t: DP_CY + DP_H*1.1, w: DP_W, h: DP_H },
   { id: "LEFT",  base: "LEFT",  l: DP_CX - DP_W*2.1, t: DP_CY - DP_H/2, w: DP_W, h: DP_H },
   { id: "RIGHT", base: "RIGHT", l: DP_CX + DP_W*1.1, t: DP_CY - DP_H/2, w: DP_W, h: DP_H },
-  { id: "MODE",  base: "MODE",  shift: "SETUP", l: px(404), t: R1_T, w: R1_W, h: R1_H },
   { id: "MODE",  base: "MODE",  shift: "SETUP", l: px(478), t: R1_T, w: R1_W, h: R1_H },
-  { id: "ON",    base: "ON",                    l: px(580), t: R1_T, w: R1_W, h: R1_H },
+  { id: "ON",    base: "ON",                    l: px(585), t: R1_T, w: R1_W, h: R1_H },
 
   // ── Sci row A : √x  x²  x⁻¹  10^x  log  ln ─────────────────
   { id: "SQRT", base: "SQRT",  shift: "CBRT",        l: SP_COL[0], t: SP_ROW[0], w: SP_W, h: SP_H },
