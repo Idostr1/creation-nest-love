@@ -12,6 +12,69 @@ import {
   type Vars,
 } from "@/lib/calc/engine";
 
+// Multi-char tokens that should behave as a single unit for cursor & DEL.
+// Order matters: longer first.
+const MULTI_TOKENS = [
+  "asinh(", "acosh(", "atanh(",
+  "sinh(", "cosh(", "tanh(",
+  "asin(", "acos(", "atan(",
+  "sqrt(", "cbrt(",
+  "sin(", "cos(", "tan(", "log(", "abs(", "exp(",
+  "10^(", "e^(",
+  "ln(",
+  "×10^", "Ans", "(-", "⁻¹",
+  "√(", "∛(",
+];
+
+function tokenize(s: string): string[] {
+  const out: string[] = [];
+  let i = 0;
+  while (i < s.length) {
+    let matched = "";
+    for (const t of MULTI_TOKENS) {
+      if (s.startsWith(t, i)) { matched = t; break; }
+    }
+    if (matched) { out.push(matched); i += matched.length; }
+    else { out.push(s[i]); i++; }
+  }
+  return out;
+}
+
+// Snap a character index to the nearest token boundary at-or-before it.
+function snapBoundary(s: string, charIdx: number): number {
+  const toks = tokenize(s);
+  let pos = 0;
+  for (const t of toks) {
+    if (pos + t.length > charIdx) return pos;
+    pos += t.length;
+  }
+  return pos;
+}
+
+function prevBoundary(s: string, charIdx: number): number {
+  const snap = snapBoundary(s, charIdx);
+  if (snap < charIdx) return snap; // mid-token → snap left
+  // already at boundary → step one token left
+  const toks = tokenize(s);
+  let pos = 0, prev = 0;
+  for (const t of toks) {
+    if (pos >= charIdx) return prev;
+    prev = pos;
+    pos += t.length;
+  }
+  return prev;
+}
+
+function nextBoundary(s: string, charIdx: number): number {
+  const toks = tokenize(s);
+  let pos = 0;
+  for (const t of toks) {
+    if (pos >= charIdx) return Math.min(s.length, pos + t.length);
+    pos += t.length;
+  }
+  return s.length;
+}
+
 export const Route = createFileRoute("/")({
   component: Index,
 });
