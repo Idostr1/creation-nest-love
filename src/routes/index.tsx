@@ -555,7 +555,7 @@ function Index() {
       <div
         className="relative select-none mx-auto"
         style={{
-          width: "min(92vw, calc(92vh * 717 / 1488), 420px)",
+          width: "min(92vw, calc(92vh * 1), 460px)",
           containerType: "inline-size",
         }}
       >
@@ -570,7 +570,7 @@ function Index() {
         <div
           className="absolute font-mono"
           style={{
-            left: "10.6%", top: "15.35%", width: "78.8%", height: "14.25%",
+            left: "17%", top: "16%", width: "65%", height: "17%",
             color: "#1a1a1a",
             padding: "0.9cqw 1.8cqw 1.2cqw",
             display: "flex",
