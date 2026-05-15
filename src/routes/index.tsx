@@ -331,8 +331,8 @@ function Index() {
     if (action === "OFF") { /* no-op visual */ consume(); return; }
 
     // ---- navigation ----
-    if (action === "LEFT")  { setCursor((c) => Math.max(0, c - 1)); consume(); return; }
-    if (action === "RIGHT") { setCursor((c) => Math.min(expr.length, c + 1)); consume(); return; }
+    if (action === "LEFT")  { setCursor((c) => prevBoundary(expr, c)); consume(); return; }
+    if (action === "RIGHT") { setCursor((c) => nextBoundary(expr, c)); consume(); return; }
     if (action === "UP") {
       if (history.length) {
         const i = Math.min(history.length - 1, hIdx + 1);
@@ -354,8 +354,9 @@ function Index() {
     if (action === "DEL") {
       if (result) { setResult(""); consume(); return; }
       if (cursor > 0) {
-        setExpr((e) => e.slice(0, cursor - 1) + e.slice(cursor));
-        setCursor((c) => c - 1);
+        const start = prevBoundary(expr, cursor);
+        setExpr((e) => e.slice(0, start) + e.slice(cursor));
+        setCursor(start);
       }
       consume(); return;
     }
