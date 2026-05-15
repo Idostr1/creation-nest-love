@@ -2,8 +2,8 @@
 // Coordinates are percentages of the calculator image (l=left, t=top, w/h).
 // Each key has a base action and optional SHIFT / ALPHA secondary actions.
 //
-// Image size: 717 x 1488 px.
-// All percentages: l/w are % of 717px width, t/h are % of 1488px height.
+// Image size: 900 x 1695 px (real fx-991ES product photo).
+// All percentages: l/w are % of 900px width, t/h are % of 1695px height.
 
 export type KeyDef = {
   id: string;
@@ -14,39 +14,39 @@ export type KeyDef = {
 };
 
 // Helper: pixel coords → percentage
-const px = (x: number) => +(x / 717 * 100).toFixed(2);
-const py = (y: number) => +(y / 1488 * 100).toFixed(2);
+const px = (x: number) => +(x / 900 * 100).toFixed(2);
+const py = (y: number) => +(y / 1695 * 100).toFixed(2);
 
 // ============================================================
-// ROW 1: SHIFT  ALPHA  [D-pad]  MODE  ON  (round buttons just below screen)
+// ROW 1: SHIFT  ALPHA  [D-pad]  MODE  ON  (round buttons below screen)
 // ============================================================
-const R1_T  = py(530);
-const R1_H  = py(80);
-const R1_W  = px(95);
+const R1_T  = py(595);
+const R1_H  = py(55);
+const R1_W  = px(85);
 
 // SCI PAD: 6 cols × 3 rows (rectangular buttons)
-const SP_W = px(100);
-const SP_H = py(70);
-const SP_COL = [40, 145, 252, 358, 463, 568].map(px);
-const SP_ROW = [738, 825, 910].map(py);
+const SP_W = px(85);
+const SP_H = py(60);
+const SP_COL = [155, 252, 348, 446, 545, 645].map(px);
+const SP_ROW = [810, 895, 985].map(py);
 
-// NUMPAD: 5 cols × 4 rows
-const NP_W = px(115);
-const NP_H = py(95);
-const NP_COL = [38, 173, 308, 443, 578].map(px);
-const NP_ROW = [1025, 1140, 1252, 1357].map(py);
+// NUMPAD: 5 cols × 4 rows (larger keys)
+const NP_W = px(105);
+const NP_H = py(90);
+const NP_COL = [148, 268, 388, 510, 635].map(px);
+const NP_ROW = [1100, 1210, 1320, 1435].map(py);
 
 export const KEYS: KeyDef[] = [
-  // ── Row 1 ───────────────────────────────────────────────────
-  { id: "SHIFT", base: "SHIFT",          l: px(60),  t: R1_T, w: R1_W, h: R1_H },
-  { id: "ALPHA", base: "ALPHA",          l: px(170), t: R1_T, w: R1_W, h: R1_H },
-  // D-pad arrows (absolute positions measured on the image)
-  { id: "UP",    base: "UP",    l: px(328), t: py(530), w: px(60), h: py(50) },
-  { id: "DOWN",  base: "DOWN",  l: px(328), t: py(650), w: px(60), h: py(50) },
-  { id: "LEFT",  base: "LEFT",  l: px(266), t: py(590), w: px(60), h: py(45) },
-  { id: "RIGHT", base: "RIGHT", l: px(388), t: py(590), w: px(60), h: py(45) },
-  { id: "MODE",  base: "MODE",  shift: "SETUP", l: px(478), t: R1_T, w: R1_W, h: R1_H },
-  { id: "ON",    base: "ON",                    l: px(585), t: R1_T, w: R1_W, h: R1_H },
+  // ── Row 1 (round buttons) ───────────────────────────────────
+  { id: "SHIFT", base: "SHIFT",                l: px(165), t: R1_T, w: R1_W, h: R1_H },
+  { id: "ALPHA", base: "ALPHA",                l: px(270), t: R1_T, w: R1_W, h: R1_H },
+  // D-pad arrows around REPLAY (absolute positions on the image)
+  { id: "UP",    base: "UP",    l: px(420), t: py(595), w: px(70), h: py(45) },
+  { id: "DOWN",  base: "DOWN",  l: px(420), t: py(745), w: px(70), h: py(45) },
+  { id: "LEFT",  base: "LEFT",  l: px(355), t: py(665), w: px(50), h: py(60) },
+  { id: "RIGHT", base: "RIGHT", l: px(505), t: py(665), w: px(50), h: py(60) },
+  { id: "MODE",  base: "MODE",  shift: "SETUP", l: px(560), t: R1_T, w: R1_W, h: R1_H },
+  { id: "ON",    base: "ON",                    l: px(670), t: R1_T, w: R1_W, h: R1_H },
 
   // ── Sci row A : √x  x²  x⁻¹  10^x  log  ln ─────────────────
   { id: "SQRT", base: "SQRT",  shift: "CBRT",        l: SP_COL[0], t: SP_ROW[0], w: SP_W, h: SP_H },
