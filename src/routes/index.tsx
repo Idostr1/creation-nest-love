@@ -260,11 +260,20 @@ function Index() {
         D5: "EQN", D6: "MATRIX", D7: "TABLE", D8: "VECTOR",
       };
       if (map[action]) {
-        setCalcMode(map[action]);
+        const picked = map[action];
         setMenu(null);
         replaceAll("");
-        if (map[action] === "EQN") setMenu({ kind: "EQN" });
-        else if (map[action] === "TABLE") runTable();
+        // EQN and TABLE are one-shot flows — don't latch them as the
+        // persistent mode (real calc returns to COMP after the flow).
+        if (picked === "EQN") {
+          setCalcMode("COMP");
+          setMenu({ kind: "EQN" });
+        } else if (picked === "TABLE") {
+          setCalcMode("COMP");
+          runTable();
+        } else {
+          setCalcMode(picked);
+        }
       }
       if (action === "AC") setMenu(null);
       consume(); return;
@@ -326,6 +335,11 @@ function Index() {
     if (action === "ON" || action === "AC") {
       setExpr(""); setCursor(0); setResult(""); setMenu(null);
       setStoMode("none");
+      if (action === "ON") {
+        // Hard reset back to default COMP mode.
+        setCalcMode("COMP");
+        setShift(false); setAlpha(false); setHyp(false);
+      }
       consume(); return;
     }
     if (action === "OFF") { /* no-op visual */ consume(); return; }
