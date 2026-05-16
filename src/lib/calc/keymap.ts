@@ -1,6 +1,7 @@
 // Single source of truth for every button on the calculator face.
 // Coordinates are percentages of the calculator image (l=left, t=top, w/h).
-// Image: 500 x 500 px (user-supplied Casio fx-991ES PLUS 2nd edition photo).
+// Image: 1024 x 1024 (AI-generated Casio fx-991ES PLUS, layout matches the
+// physical reference spec in Casio_Physical_Layout_Reference.xlsx).
 
 export type KeyDef = {
   id: string;
@@ -10,31 +11,34 @@ export type KeyDef = {
   l: number; t: number; w: number; h: number;
 };
 
-const px = (x: number) => +(x / 500 * 100).toFixed(2);
-const py = (y: number) => +(y / 500 * 100).toFixed(2);
+const px = (x: number) => +(x / 1024 * 100).toFixed(2);
+const py = (y: number) => +(y / 1024 * 100).toFixed(2);
 
-// Round-button row Y
-const RB_T = py(158), RB_H = py(22);
+// Row Y centers (in original 1024px image coords)
+const RB_CY = py(305);   // round buttons: SHIFT / ALPHA / D-pad / MODE / ON
+const RB_H  = py(60);    // round-button hit height
 
-// Sci pad rows (4-wide row A; 6-wide rows B/C/D)
-const SA_T = py(212), SA_H = py(20);     // CALC ∫dx x⁻¹ log□
-const SB_T = py(240), SB_H = py(20);     // frac √ x² xⁿ log ln
-const SC_T = py(269), SC_H = py(20);     // (-) °'" hyp sin cos tan
-const SD_T = py(298), SD_H = py(20);     // RCL ENG ( ) S⇔D M+
+// Sci rows
+const R_CALC = py(393);  // Row 2: CALC ∫dx x⁻¹ log□  (4 wide)
+const R_FRAC = py(462);  // Row 3: a/b √ x² xⁿ        (4 wide)
+const R_LOG  = py(531);  // Row 4: log ln              (2 wide, left)
+const R_TRIG = py(612);  // Row 5: (-) °'" hyp sin cos tan  (6 wide)
+const R_RCL  = py(682);  // Row 6: RCL ENG ( ) S⇔D M+      (6 wide)
+const SCI_H  = py(48);
 
 // Numpad rows
-const NP_H = py(28);
-const NP_T = [346, 382, 418, 452].map(py);
+const NP_CY = [760, 826, 892, 962].map(py);
+const NP_H  = py(55);
 
-// 4-col centers (row A)
-const C4 = [150, 220, 290, 355].map(px);
-const W4 = px(60);
-// 6-col centers (rows B/C/D)
-const C6 = [135, 182, 229, 275, 322, 368].map(px);
-const W6 = px(42);
+// 4-col centers (rows 2 & 3)
+const C4 = [320, 442, 580, 700].map(px);
+const W4 = px(105);
+// 6-col centers (rows 5 & 6)
+const C6 = [290, 378, 466, 552, 640, 725].map(px);
+const W6 = px(78);
 // 5-col centers (numpad)
-const C5 = [148, 205, 258, 308, 358].map(px);
-const W5 = px(46);
+const C5 = [305, 408, 512, 614, 720].map(px);
+const W5 = px(88);
 
 const cell = (cx: number, cy: number, w: number, h: number) => ({
   l: +(cx - w / 2).toFixed(2),
@@ -44,72 +48,74 @@ const cell = (cx: number, cy: number, w: number, h: number) => ({
 
 export const KEYS: KeyDef[] = [
   // ── Top round buttons + D-pad ─────────────────────────────
-  { id: "SHIFT", base: "SHIFT", ...cell(px(140), py(168), px(34), RB_H) },
-  { id: "ALPHA", base: "ALPHA", ...cell(px(184), py(168), px(34), RB_H) },
-  { id: "UP",    base: "UP",    ...cell(px(248), py(155), px(24), py(14)) },
-  { id: "DOWN",  base: "DOWN",  ...cell(px(248), py(195), px(24), py(14)) },
-  { id: "LEFT",  base: "LEFT",  ...cell(px(225), py(175), px(16), py(22)) },
-  { id: "RIGHT", base: "RIGHT", ...cell(px(271), py(175), px(16), py(22)) },
-  { id: "MODE",  base: "MODE",  shift: "SETUP", ...cell(px(316), py(168), px(34), RB_H) },
-  { id: "ON",    base: "ON",                    ...cell(px(360), py(168), px(34), RB_H) },
+  { id: "SHIFT", base: "SHIFT", ...cell(px(308), RB_CY, px(60), RB_H) },
+  { id: "ALPHA", base: "ALPHA", ...cell(px(395), RB_CY, px(60), RB_H) },
+  { id: "UP",    base: "UP",    ...cell(px(513), py(275), px(48), py(28)) },
+  { id: "DOWN",  base: "DOWN",  ...cell(px(513), py(338), px(48), py(28)) },
+  { id: "LEFT",  base: "LEFT",  ...cell(px(478), py(306), px(32), py(40)) },
+  { id: "RIGHT", base: "RIGHT", ...cell(px(548), py(306), px(32), py(40)) },
+  { id: "MODE",  base: "MODE",  shift: "SETUP", ...cell(px(629), RB_CY, px(60), RB_H) },
+  { id: "ON",    base: "ON",                    ...cell(px(716), RB_CY, px(60), RB_H) },
 
-  // ── Sci row A (4 wide): CALC  ∫dx  x⁻¹  log_a(b) ─────────
-  { id: "CALC",  base: "CALC", shift: "SOLVE",  ...cell(C4[0], py(222), W4, SA_H) },
-  { id: "INTG",  base: "INTG", shift: "DIFF",   alpha: "SUM", ...cell(C4[1], py(222), W4, SA_H) },
-  { id: "INV",   base: "INV",  shift: "FACT",   ...cell(C4[2], py(222), W4, SA_H) },
-  { id: "LOGAB", base: "LOGAB",                  ...cell(C4[3], py(222), W4, SA_H) },
+  // ── Row 2 (4 wide): CALC  ∫dx  x⁻¹  log_a(b) ─────────────
+  { id: "CALC",  base: "CALC", shift: "SOLVE",                 ...cell(C4[0], R_CALC, W4, SCI_H) },
+  { id: "INTG",  base: "INTG", shift: "DIFF", alpha: "SUM",    ...cell(C4[1], R_CALC, W4, SCI_H) },
+  { id: "INV",   base: "INV",  shift: "FACT",                  ...cell(C4[2], R_CALC, W4, SCI_H) },
+  { id: "LOGAB", base: "LOGAB",                                ...cell(C4[3], R_CALC, W4, SCI_H) },
 
-  // ── Sci row B (6): frac  √x  x²  xⁿ  log  ln ─────────────
-  { id: "FRAC", base: "FRAC", shift: "MIXFRAC",        ...cell(C6[0], SB_T, W6, SB_H) },
-  { id: "SQRT", base: "SQRT", shift: "CBRT",           ...cell(C6[1], SB_T, W6, SB_H) },
-  { id: "SQ",   base: "SQ",   shift: "CUBE",  alpha: "DEC", ...cell(C6[2], SB_T, W6, SB_H) },
-  { id: "POW",  base: "POW",  shift: "NTHRT", alpha: "HEX", ...cell(C6[3], SB_T, W6, SB_H) },
-  { id: "LOG",  base: "LOG",  shift: "POW10", alpha: "BIN", ...cell(C6[4], SB_T, W6, SB_H) },
-  { id: "LN",   base: "LN",   shift: "POWE",  alpha: "OCT", ...cell(C6[5], SB_T, W6, SB_H) },
+  // ── Row 3 (4 wide): a/b  √  x²  xⁿ ───────────────────────
+  { id: "FRAC", base: "FRAC", shift: "MIXFRAC",                ...cell(C4[0], R_FRAC, W4, SCI_H) },
+  { id: "SQRT", base: "SQRT", shift: "CBRT",                   ...cell(C4[1], R_FRAC, W4, SCI_H) },
+  { id: "SQ",   base: "SQ",   shift: "CUBE",  alpha: "DEC",    ...cell(C4[2], R_FRAC, W4, SCI_H) },
+  { id: "POW",  base: "POW",  shift: "NTHRT", alpha: "HEX",    ...cell(C4[3], R_FRAC, W4, SCI_H) },
 
-  // ── Sci row C (6): (-)  °'"  hyp  sin  cos  tan ──────────
-  { id: "NEG",  base: "NEG",                            alpha: "VAR_A", ...cell(C6[0], SC_T, W6, SC_H) },
-  { id: "DMS",  base: "DMS",                            alpha: "VAR_B", ...cell(C6[1], SC_T, W6, SC_H) },
-  { id: "HYP",  base: "HYP", shift: "ABS",              alpha: "VAR_C", ...cell(C6[2], SC_T, W6, SC_H) },
-  { id: "SIN",  base: "SIN", shift: "ASIN",             alpha: "VAR_D", ...cell(C6[3], SC_T, W6, SC_H) },
-  { id: "COS",  base: "COS", shift: "ACOS",             alpha: "VAR_E", ...cell(C6[4], SC_T, W6, SC_H) },
-  { id: "TAN",  base: "TAN", shift: "ATAN",             alpha: "VAR_F", ...cell(C6[5], SC_T, W6, SC_H) },
+  // ── Row 4 (2 wide, left): log  ln ────────────────────────
+  { id: "LOG",  base: "LOG",  shift: "POW10", alpha: "BIN",    ...cell(C4[0], R_LOG, W4, SCI_H) },
+  { id: "LN",   base: "LN",   shift: "POWE",  alpha: "OCT",    ...cell(C4[1], R_LOG, W4, SCI_H) },
 
-  // ── Sci row D (6): RCL  ENG  (  )  S⇔D  M+ ──────────────
-  { id: "RCL",   base: "RCL",   shift: "STO",                       ...cell(C6[0], SD_T, W6, SD_H) },
-  { id: "ENG",   base: "ENG",                       alpha: "VAR_Y", ...cell(C6[1], SD_T, W6, SD_H) },
-  { id: "LP",    base: "LP",    shift: "PCT",                       ...cell(C6[2], SD_T, W6, SD_H) },
-  { id: "RP",    base: "RP",    shift: "COMMA",     alpha: "VAR_X", ...cell(C6[3], SD_T, W6, SD_H) },
-  { id: "SD",    base: "SD",                                         ...cell(C6[4], SD_T, W6, SD_H) },
-  { id: "MPLUS", base: "MPLUS", shift: "MMINUS",    alpha: "VAR_M", ...cell(C6[5], SD_T, W6, SD_H) },
+  // ── Row 5 (6): (-)  °'"  hyp  sin  cos  tan ──────────────
+  { id: "NEG",  base: "NEG",                  alpha: "VAR_A",  ...cell(C6[0], R_TRIG, W6, SCI_H) },
+  { id: "DMS",  base: "DMS",                  alpha: "VAR_B",  ...cell(C6[1], R_TRIG, W6, SCI_H) },
+  { id: "HYP",  base: "HYP", shift: "ABS",    alpha: "VAR_C",  ...cell(C6[2], R_TRIG, W6, SCI_H) },
+  { id: "SIN",  base: "SIN", shift: "ASIN",   alpha: "VAR_D",  ...cell(C6[3], R_TRIG, W6, SCI_H) },
+  { id: "COS",  base: "COS", shift: "ACOS",   alpha: "VAR_E",  ...cell(C6[4], R_TRIG, W6, SCI_H) },
+  { id: "TAN",  base: "TAN", shift: "ATAN",   alpha: "VAR_F",  ...cell(C6[5], R_TRIG, W6, SCI_H) },
 
-  // ── Numpad row 1: 7  8  9  DEL  AC ───────────────────────
-  { id: "D7",  base: "D7",                          ...cell(C5[0], NP_T[0], W5, NP_H) },
-  { id: "D8",  base: "D8",                          ...cell(C5[1], NP_T[0], W5, NP_H) },
-  { id: "D9",  base: "D9",                          ...cell(C5[2], NP_T[0], W5, NP_H) },
-  { id: "DEL", base: "DEL", shift: "INS",           ...cell(C5[3], NP_T[0], W5, NP_H) },
-  { id: "AC",  base: "AC",  shift: "OFF",           ...cell(C5[4], NP_T[0], W5, NP_H) },
+  // ── Row 6 (6): RCL  ENG  (  )  S⇔D  M+ ──────────────────
+  { id: "RCL",   base: "RCL",   shift: "STO",                   ...cell(C6[0], R_RCL, W6, SCI_H) },
+  { id: "ENG",   base: "ENG",                   alpha: "VAR_Y", ...cell(C6[1], R_RCL, W6, SCI_H) },
+  { id: "LP",    base: "LP",    shift: "PCT",                   ...cell(C6[2], R_RCL, W6, SCI_H) },
+  { id: "RP",    base: "RP",    shift: "COMMA", alpha: "VAR_X", ...cell(C6[3], R_RCL, W6, SCI_H) },
+  { id: "SD",    base: "SD",                                    ...cell(C6[4], R_RCL, W6, SCI_H) },
+  { id: "MPLUS", base: "MPLUS", shift: "MMINUS", alpha: "VAR_M",...cell(C6[5], R_RCL, W6, SCI_H) },
 
-  // ── Numpad row 2: 4  5  6  ×  ÷ ──────────────────────────
-  { id: "D4",  base: "D4",                          ...cell(C5[0], NP_T[1], W5, NP_H) },
-  { id: "D5",  base: "D5",                          ...cell(C5[1], NP_T[1], W5, NP_H) },
-  { id: "D6",  base: "D6",                          ...cell(C5[2], NP_T[1], W5, NP_H) },
-  { id: "MUL", base: "MUL", shift: "NPR",           ...cell(C5[3], NP_T[1], W5, NP_H) },
-  { id: "DIV", base: "DIV", shift: "NCR",           ...cell(C5[4], NP_T[1], W5, NP_H) },
+  // ── Numpad row 7: 7  8  9  DEL  AC ───────────────────────
+  { id: "D7",  base: "D7",                  ...cell(C5[0], NP_CY[0], W5, NP_H) },
+  { id: "D8",  base: "D8",                  ...cell(C5[1], NP_CY[0], W5, NP_H) },
+  { id: "D9",  base: "D9",                  ...cell(C5[2], NP_CY[0], W5, NP_H) },
+  { id: "DEL", base: "DEL", shift: "INS",   ...cell(C5[3], NP_CY[0], W5, NP_H) },
+  { id: "AC",  base: "AC",  shift: "OFF",   ...cell(C5[4], NP_CY[0], W5, NP_H) },
 
-  // ── Numpad row 3: 1  2  3  +  − ──────────────────────────
-  { id: "D1",  base: "D1",                          ...cell(C5[0], NP_T[2], W5, NP_H) },
-  { id: "D2",  base: "D2",                          ...cell(C5[1], NP_T[2], W5, NP_H) },
-  { id: "D3",  base: "D3",                          ...cell(C5[2], NP_T[2], W5, NP_H) },
-  { id: "ADD", base: "ADD", shift: "POL",           ...cell(C5[3], NP_T[2], W5, NP_H) },
-  { id: "SUB", base: "SUB", shift: "REC",           ...cell(C5[4], NP_T[2], W5, NP_H) },
+  // ── Numpad row 8: 4  5  6  ×  ÷ ──────────────────────────
+  { id: "D4",  base: "D4",                  ...cell(C5[0], NP_CY[1], W5, NP_H) },
+  { id: "D5",  base: "D5",                  ...cell(C5[1], NP_CY[1], W5, NP_H) },
+  { id: "D6",  base: "D6",                  ...cell(C5[2], NP_CY[1], W5, NP_H) },
+  { id: "MUL", base: "MUL", shift: "NPR",   ...cell(C5[3], NP_CY[1], W5, NP_H) },
+  { id: "DIV", base: "DIV", shift: "NCR",   ...cell(C5[4], NP_CY[1], W5, NP_H) },
 
-  // ── Numpad row 4: 0  .  ×10ⁿ  Ans  = ─────────────────────
-  { id: "D0",  base: "D0",                          ...cell(C5[0], NP_T[3], W5, NP_H) },
-  { id: "DOT", base: "DOT",                         ...cell(C5[1], NP_T[3], W5, NP_H) },
-  { id: "EXP", base: "EXP", shift: "PI", alpha: "EULER", ...cell(C5[2], NP_T[3], W5, NP_H) },
-  { id: "ANS", base: "ANS",                         ...cell(C5[3], NP_T[3], W5, NP_H) },
-  { id: "EQ",  base: "EQ",                          ...cell(C5[4], NP_T[3], W5, NP_H) },
+  // ── Numpad row 9: 1  2  3  +  − ──────────────────────────
+  { id: "D1",  base: "D1",                  ...cell(C5[0], NP_CY[2], W5, NP_H) },
+  { id: "D2",  base: "D2",                  ...cell(C5[1], NP_CY[2], W5, NP_H) },
+  { id: "D3",  base: "D3",                  ...cell(C5[2], NP_CY[2], W5, NP_H) },
+  { id: "ADD", base: "ADD", shift: "POL",   ...cell(C5[3], NP_CY[2], W5, NP_H) },
+  { id: "SUB", base: "SUB", shift: "REC",   ...cell(C5[4], NP_CY[2], W5, NP_H) },
+
+  // ── Numpad row 10: 0  .  ×10ⁿ  Ans  = ────────────────────
+  { id: "D0",  base: "D0",                  ...cell(C5[0], NP_CY[3], W5, NP_H) },
+  { id: "DOT", base: "DOT",                 ...cell(C5[1], NP_CY[3], W5, NP_H) },
+  { id: "EXP", base: "EXP", shift: "PI", alpha: "EULER", ...cell(C5[2], NP_CY[3], W5, NP_H) },
+  { id: "ANS", base: "ANS",                 ...cell(C5[3], NP_CY[3], W5, NP_H) },
+  { id: "EQ",  base: "EQ",                  ...cell(C5[4], NP_CY[3], W5, NP_H) },
 ];
 
 // What text to insert for each action id.
