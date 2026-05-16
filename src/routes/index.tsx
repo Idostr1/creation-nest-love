@@ -570,9 +570,9 @@ function Index() {
         <div
           className="absolute font-mono"
           style={{
-            left: "12%", top: "8.5%", width: "76%", height: "14%",
+            left: "12%", top: "8.5%", width: "76%", height: "14.6%",
             color: "#1a1a1a",
-            padding: "0.9cqw 1.8cqw 1.2cqw",
+            padding: "0.6cqw 1.4cqw 0.8cqw",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
@@ -581,9 +581,9 @@ function Index() {
           {/* status row */}
           <div
             className="flex items-center justify-between opacity-75"
-            style={{ fontSize: "2.35cqw", letterSpacing: "0.08em", lineHeight: 1 }}
+            style={{ fontSize: "3cqw", letterSpacing: "0.08em", lineHeight: 1 }}
           >
-            <span className="flex" style={{ gap: "1.15cqw" }}>
+            <span className="flex" style={{ gap: "1.4cqw" }}>
               <span style={{ visibility: shift ? "visible" : "hidden" }}>S</span>
               <span style={{ visibility: alpha ? "visible" : "hidden" }}>A</span>
               <span style={{ visibility: hyp ? "visible" : "hidden" }}>HYP</span>
