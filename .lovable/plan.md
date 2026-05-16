@@ -1,92 +1,86 @@
+# Plan — AI-generate a spec-matched calculator + realign buttons
 
-# Plan — Real reference image, token-aware cursor, mode-state fix
+## Goal
 
-Three focused passes addressing the three issues you raised.
+Generate a calculator image whose physical layout exactly matches the
+attached spec, then rewrite the keymap so every button hitbox lines up
+with the new image.
 
-## 1. Replace the calculator image with a real photo
+## The spec (from the uploaded XLSX)
 
-The current `src/assets/casio.png` is an AI-generated render and the button
-positions don't match a real fx-991ES PLUS, which is why every recalibration
-pass leaves something off. We'll swap it for an actual product photo and then
-re-measure once against the truth.
+The reference defines 10 physical rows:
 
-Steps:
-- Download a high-resolution Casio fx-991ES PLUS product photo from a public
-  source (e.g. Casio's product page or Wikimedia) using `curl`. No image
-  generation.
-- Save to `src/assets/casio.png` (overwrite). Keep the same import path so no
-  other files need to change.
-- Re-open the preview with `?debug=1`, screenshot it, and rewrite ONLY the
-  pixel constants in `src/lib/calc/keymap.ts`:
-  - `R1_T`, `R1_H`, `R1_W` (SHIFT/ALPHA/MODE/ON row)
-  - D-pad absolute coords for `UP` / `DOWN` / `LEFT` / `RIGHT`
-  - `SP_COL[]`, `SP_ROW[]`, `SP_W`, `SP_H` (sci pad — 6×3)
-  - `NP_COL[]`, `NP_ROW[]`, `NP_W`, `NP_H` (numpad — 5×4, including the `=` key)
-- Verify by re-screenshotting with `?debug=1`.
+```text
+Row 1 (top):  SHIFT  ALPHA   [D-pad]   MODE   ON          (5 slots)
+Row 2:        CALC   ∫dx     x⁻¹       log_a(b)            (4 wide)
+Row 3:        Frac   √       x²        xⁿ                  (4 wide)
+Row 4:        log    ln                                    (2 wide, left)
+Row 5:        (-)    °'"     hyp       sin   cos   tan     (6 wide)
+Row 6:        RCL    ENG     (         )     S⇔D   M+      (6 wide)
+Row 7:        7      8       9         DEL   AC            (5 wide)
+Row 8:        4      5       6         ×     ÷             (5 wide)
+Row 9:        1      2       3         +     −             (5 wide)
+Row 10:       0      .       ×10ⁿ      Ans   =             (5 wide)
+```
 
-## 2. Token-aware cursor / DEL
+Note this differs from what's currently coded: rows 3 and 4 are split
+(frac/√/x²/xⁿ on row 3, then log/ln alone on row 4) instead of one
+6-wide row.
 
-Right now `expr` is a raw string and `LEFT` / `RIGHT` / `DEL` move or delete
-one *character* at a time. Tokens like `Ans`, `sin(`, `log(`, `√(`, `×10^`,
-`π` should behave as single units — pressing ► on `Ans` should jump 3 chars,
-and DEL should remove the whole token.
+## Pass 1 — Generate the image
 
-Changes (logic-only, in `src/routes/index.tsx`):
-- Add a small `tokenize(expr)` helper that returns the list of token strings
-  in order. The token alphabet is the set of strings produced by `INSERT`
-  (multi-char tokens) plus single digits / operators / parens / letters.
-  Implementation: longest-match scan against a fixed list of multi-char
-  tokens (`Ans`, `sin(`, `cos(`, `tan(`, `asin(`, ..., `log(`, `ln(`,
-  `10^(`, `e^(`, `sqrt(`, equivalent display forms like `√(`, `∛(`, `×10^`,
-  `(-`, `⁻¹`, etc.), then fall through to a single character.
-- Convert character-cursor `cursor` into a token-aware step:
-  - `LEFT`: find the token boundary at-or-before `cursor` and jump to the
-    previous boundary.
-  - `RIGHT`: jump to the next boundary.
-  - `DEL`: delete the token ending at `cursor` (whole token, not one char).
-- Keep `cursor` as a character index internally so insertion math doesn't
-  change; the helper just snaps it to token boundaries.
-- Ensure new `insert()` calls land at a clean boundary (cursor already at end
-  of inserted text — no change needed).
+Use `imagegen--generate_image` (premium quality, transparent background
+off) to produce a clean, top-down Casio fx-991ES PLUS render at 1024x1024
+with the exact row structure above. The prompt will pin:
 
-## 3. Fix the "mode sticks visually but reverts" bug
+- 1:1 framing, calculator centered, no perspective tilt
+- LCD screen in the upper third
+- Round black SHIFT/ALPHA/MODE/ON buttons + circular D-pad in row 1
+- Grey scientific keys in rows 2–6 (with row 4 only half-filled)
+- Light-grey number/operator keys in rows 7–9
+- Bottom row 7–10 with the `=` key on the far right
 
-Right now `AC` and `ON` reset `expr` / `cursor` / `result` / `menu` but do
-NOT touch `calcMode`. So if you pick `5:EQN` from MODE, finish or cancel,
-then press AC, the status indicator still says `EQN` but the next operations
-behave like `COMP` (because EQN-only flows are gated by the menu, not by
-`calcMode`).
+Save to `src/assets/casio.png` (overwrite the current photo).
 
-Two related bugs to fix together:
-- When `MAIN` menu picks `EQN` or `TABLE`, current code sets `calcMode` to
-  `EQN`/`TABLE` AND opens the sub-menu. After the sub-flow ends, `calcMode`
-  is left dangling. Fix: do NOT change `calcMode` for `EQN`/`TABLE` —
-  these are one-shot flows. Only `COMP`, `CMPLX`, `STAT`, `BASE`,
-  `MATRIX`, `VECTOR` should set `calcMode` from the MAIN menu.
-- `ON` should also reset `calcMode` to `COMP` (real calc behaviour: ON
-  returns to default COMP). `AC` should NOT change `calcMode` (it just
-  clears the entry).
+If the first generation has the wrong layout, regenerate up to 2 more
+times with a tightened prompt rather than trying to recalibrate against
+a wrong image.
 
-Files: `src/routes/index.tsx` (MAIN menu handler, `ON` branch).
+## Pass 2 — Recalibrate `src/lib/calc/keymap.ts`
 
-## Sanity-check after the three passes
+With the image at `?debug=1`, screenshot once and rewrite ONLY the
+coordinate constants:
 
-- D-pad arrows, MODE, ON, and `=` all hit their physical buttons in the new
-  photo.
-- Type `Ans+1`, place cursor at the end, press ◄ once → cursor jumps to
-  before `+1` (not into the middle of `Ans`). DEL once removes `Ans`
-  whole.
-- MODE → 5 (EQN) → 1 → fill in coefficients → results show. Press AC. Status
-  indicator no longer shows EQN; calculator is in COMP. Press ON; same.
+- `RB_T/RB_H` for the top round-button row
+- D-pad cell coords (UP/DOWN/LEFT/RIGHT) centered on the REPLAY pad
+- 6 new row-Y constants: `R2..R7` for sci rows, plus existing numpad rows
+- Re-split row B (currently 6-wide) into:
+  - **Row 3 (4 wide)**: FRAC, SQRT, SQ, POW — using the same 4-col
+    centers as row 2
+  - **Row 4 (2 wide, left)**: LOG, LN — first two of the 4-col centers
+- Move the LOG/LN `alpha` Base-N labels (BIN/OCT) onto the new row 4
+  (no logic change, just position)
+- Keep rows 5/6 6-wide as before
+- Keep numpad 5-wide as before
+
+Logic in `INSERT` / `displayToEval` stays untouched — only the `KEYS[]`
+positions change.
+
+## Pass 3 — Verify
+
+- Screenshot with `?debug=1` and visually confirm every magenta hitzone
+  sits on its physical button.
+- Type a quick `2+3=` to confirm numpad mapping survived.
+- Confirm LCD overlay still aligns (it may need a small `top:` nudge if
+  the new image has a slightly different screen position).
 
 ## Out of scope
 
-- Natural-display fraction/√ rendering.
-- Persisting variables across reloads.
-- Matrix/Vector/Stat/Base-N modes (still stubbed).
+- Changing any calculator logic, mode handling, or token navigation.
+- LCD natural-display rendering.
 
 ## Files touched
 
-- `src/assets/casio.png` — replaced with real photo
-- `src/lib/calc/keymap.ts` — coordinate constants only
-- `src/routes/index.tsx` — token-aware cursor/DEL, MAIN menu + ON fix
+- `src/assets/casio.png` (regenerated)
+- `src/lib/calc/keymap.ts` (coordinates + row 3/4 split)
+- `src/routes/index.tsx` (only if LCD overlay needs nudging)
