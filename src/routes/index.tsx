@@ -570,7 +570,7 @@ function Index() {
         <div
           className="absolute font-mono"
           style={{
-            left: "17%", top: "16%", width: "65%", height: "17%",
+            left: "12%", top: "8.5%", width: "76%", height: "14%",
             color: "#1a1a1a",
             padding: "0.9cqw 1.8cqw 1.2cqw",
             display: "flex",
