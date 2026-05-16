@@ -507,13 +507,13 @@ function Index() {
     if (menu?.kind === "PROMPT") {
       return (
         <>
-          <div style={{ fontSize: "3.4cqw", lineHeight: 1.2, opacity: 0.8 }}>
+          <div style={{ fontSize: "4.2cqw", lineHeight: 1.2, opacity: 0.8 }}>
             {menu.title}  ({menu.idx + 1}/{menu.steps.length})
           </div>
-          <div style={{ fontSize: "5cqw", lineHeight: 1.2, marginTop: "0.6cqw" }}>
+          <div style={{ fontSize: "6cqw", lineHeight: 1.2, marginTop: "0.6cqw" }}>
             {menu.steps[menu.idx]}
           </div>
-          <div className="mt-auto truncate text-right tabular-nums" style={{ fontSize: "9cqw", lineHeight: 1 }}>
+          <div className="mt-auto truncate text-right tabular-nums" style={{ fontSize: "11cqw", lineHeight: 1 }}>
             {expr || "0"}
           </div>
         </>
@@ -521,11 +521,11 @@ function Index() {
     }
     if (menu?.kind === "RESULT") {
       return (
-        <div style={{ fontSize: "3.4cqw", lineHeight: 1.25, overflow: "hidden" }}>
+        <div style={{ fontSize: "4.2cqw", lineHeight: 1.25, overflow: "hidden" }}>
           {menu.lines.slice(0, 5).map((l, i) => (
             <div key={i} className="font-mono whitespace-pre">{l}</div>
           ))}
-          <div className="opacity-60" style={{ fontSize: "2.6cqw" }}>AC to exit</div>
+          <div className="opacity-60" style={{ fontSize: "3.2cqw" }}>AC to exit</div>
         </div>
       );
     }
@@ -534,14 +534,14 @@ function Index() {
     const after = expr.slice(cursor);
     return (
       <>
-        <div className="truncate" style={{ fontSize: "5.6cqw", lineHeight: 1.15, marginTop: "0.6cqw" }}>
+        <div className="truncate" style={{ fontSize: "7cqw", lineHeight: 1.15, marginTop: "0.4cqw" }}>
           {before}
           {!result && <span className="animate-pulse">▮</span>}
           {after || (!expr && !result ? "\u00A0" : "")}
         </div>
         <div
           className="mt-auto truncate text-right tabular-nums font-semibold"
-          style={{ fontSize: "10cqw", lineHeight: 1 }}
+          style={{ fontSize: "12cqw", lineHeight: 1 }}
         >
           {result || (expr ? "" : "0")}
         </div>
@@ -623,10 +623,10 @@ function Index() {
 function MenuView({ title, opts }: { title: string; opts: string[] }) {
   return (
     <div className="flex flex-col items-center justify-center h-full w-full">
-      {title && <div className="text-center" style={{ fontSize: "3cqw", opacity: 0.7, marginBottom: "0.6cqw" }}>{title}</div>}
+      {title && <div className="text-center" style={{ fontSize: "3.6cqw", opacity: 0.7, marginBottom: "0.4cqw" }}>{title}</div>}
       <div
         className="grid grid-cols-2 mx-auto"
-        style={{ fontSize: "4cqw", lineHeight: 1.4, columnGap: "4cqw", rowGap: "0.2cqw" }}
+        style={{ fontSize: "4.8cqw", lineHeight: 1.3, columnGap: "4cqw", rowGap: "0.1cqw" }}
       >
         {opts.map((o) => (
           <div key={o} className="font-mono">{o}</div>
