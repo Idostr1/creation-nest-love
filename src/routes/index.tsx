@@ -555,8 +555,7 @@ function Index() {
       <div
         className="relative select-none mx-auto"
         style={{
-          width: "min(100vw, 100vh)",
-          maxWidth: "100dvh",
+          width: "min(100vw, 100dvh, 560px)",
           containerType: "inline-size",
         }}
       >
