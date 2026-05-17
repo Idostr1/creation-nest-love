@@ -1,3 +1,5 @@
+import type * as React from "react";
+
 // Per-button display label and visual style for the rendered calculator keys.
 // The image still provides the printed yellow (SHIFT) and red (ALPHA) labels
 // ABOVE each physical key — we only render the base label on the button face.
