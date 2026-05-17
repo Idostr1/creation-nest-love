@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import casioImg from "@/assets/casio.png";
 import { KEYS, INSERT, displayToEval } from "@/lib/calc/keymap";
+import { LABELS, keyStyle } from "@/lib/calc/buttonStyle";
 import {
   evalExpr,
   solveQuadratic,
