@@ -519,24 +519,26 @@ function Index() {
         </div>
 
         {/* Buttons */}
-        {KEYS.map((b) => (
-          <button
-            key={b.id}
-            onClick={() => runAction(b.base)}
-            aria-label={b.id}
-            className={
-              "absolute rounded-[10px] cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 " +
-              (debug
-                ? "bg-fuchsia-500/20 outline outline-1 outline-fuchsia-500/70"
-                : "bg-transparent")
-            }
-            style={{
-              left: `${b.l}%`, top: `${b.t}%`,
-              width: `${b.w}%`, height: `${b.h}%`,
-            }}
-            title={debug ? `${b.id} ${b.base}${b.shift ? " · S:" + b.shift : ""}${b.alpha ? " · A:" + b.alpha : ""}` : undefined}
-          />
-        ))}
+        {KEYS.map((b) => {
+          const { className, style } = keyStyle(b.id);
+          const label = LABELS[b.base] ?? b.id;
+          return (
+            <button
+              key={b.id}
+              onClick={() => runAction(b.base)}
+              aria-label={b.id}
+              className={className + (debug ? " outline outline-1 outline-fuchsia-500" : "")}
+              style={{
+                ...style,
+                left: `${b.l}%`, top: `${b.t}%`,
+                width: `${b.w}%`, height: `${b.h}%`,
+              }}
+              title={debug ? `${b.id} ${b.base}${b.shift ? " · S:" + b.shift : ""}${b.alpha ? " · A:" + b.alpha : ""}` : undefined}
+            >
+              {label}
+            </button>
+          );
+        })}
       </div>
     </main>
   );
