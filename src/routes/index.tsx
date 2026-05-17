@@ -12,69 +12,6 @@ import {
   type Vars,
 } from "@/lib/calc/engine";
 
-// Multi-char tokens that should behave as a single unit for cursor & DEL.
-// Order matters: longer first.
-const MULTI_TOKENS = [
-  "asinh(", "acosh(", "atanh(",
-  "sinh(", "cosh(", "tanh(",
-  "asin(", "acos(", "atan(",
-  "sqrt(", "cbrt(",
-  "sin(", "cos(", "tan(", "log(", "abs(", "exp(",
-  "10^(", "e^(",
-  "ln(",
-  "×10^", "Ans", "(-", "⁻¹",
-  "√(", "∛(",
-];
-
-function tokenize(s: string): string[] {
-  const out: string[] = [];
-  let i = 0;
-  while (i < s.length) {
-    let matched = "";
-    for (const t of MULTI_TOKENS) {
-      if (s.startsWith(t, i)) { matched = t; break; }
-    }
-    if (matched) { out.push(matched); i += matched.length; }
-    else { out.push(s[i]); i++; }
-  }
-  return out;
-}
-
-// Snap a character index to the nearest token boundary at-or-before it.
-function snapBoundary(s: string, charIdx: number): number {
-  const toks = tokenize(s);
-  let pos = 0;
-  for (const t of toks) {
-    if (pos + t.length > charIdx) return pos;
-    pos += t.length;
-  }
-  return pos;
-}
-
-function prevBoundary(s: string, charIdx: number): number {
-  const snap = snapBoundary(s, charIdx);
-  if (snap < charIdx) return snap; // mid-token → snap left
-  // already at boundary → step one token left
-  const toks = tokenize(s);
-  let pos = 0, prev = 0;
-  for (const t of toks) {
-    if (pos >= charIdx) return prev;
-    prev = pos;
-    pos += t.length;
-  }
-  return prev;
-}
-
-function nextBoundary(s: string, charIdx: number): number {
-  const toks = tokenize(s);
-  let pos = 0;
-  for (const t of toks) {
-    if (pos >= charIdx) return Math.min(s.length, pos + t.length);
-    pos += t.length;
-  }
-  return s.length;
-}
-
 export const Route = createFileRoute("/")({
   component: Index,
 });
@@ -260,20 +197,11 @@ function Index() {
         D5: "EQN", D6: "MATRIX", D7: "TABLE", D8: "VECTOR",
       };
       if (map[action]) {
-        const picked = map[action];
+        setCalcMode(map[action]);
         setMenu(null);
         replaceAll("");
-        // EQN and TABLE are one-shot flows — don't latch them as the
-        // persistent mode (real calc returns to COMP after the flow).
-        if (picked === "EQN") {
-          setCalcMode("COMP");
-          setMenu({ kind: "EQN" });
-        } else if (picked === "TABLE") {
-          setCalcMode("COMP");
-          runTable();
-        } else {
-          setCalcMode(picked);
-        }
+        if (map[action] === "EQN") setMenu({ kind: "EQN" });
+        else if (map[action] === "TABLE") runTable();
       }
       if (action === "AC") setMenu(null);
       consume(); return;
@@ -335,18 +263,13 @@ function Index() {
     if (action === "ON" || action === "AC") {
       setExpr(""); setCursor(0); setResult(""); setMenu(null);
       setStoMode("none");
-      if (action === "ON") {
-        // Hard reset back to default COMP mode.
-        setCalcMode("COMP");
-        setShift(false); setAlpha(false); setHyp(false);
-      }
       consume(); return;
     }
     if (action === "OFF") { /* no-op visual */ consume(); return; }
 
     // ---- navigation ----
-    if (action === "LEFT")  { setCursor((c) => prevBoundary(expr, c)); consume(); return; }
-    if (action === "RIGHT") { setCursor((c) => nextBoundary(expr, c)); consume(); return; }
+    if (action === "LEFT")  { setCursor((c) => Math.max(0, c - 1)); consume(); return; }
+    if (action === "RIGHT") { setCursor((c) => Math.min(expr.length, c + 1)); consume(); return; }
     if (action === "UP") {
       if (history.length) {
         const i = Math.min(history.length - 1, hIdx + 1);
@@ -368,9 +291,8 @@ function Index() {
     if (action === "DEL") {
       if (result) { setResult(""); consume(); return; }
       if (cursor > 0) {
-        const start = prevBoundary(expr, cursor);
-        setExpr((e) => e.slice(0, start) + e.slice(cursor));
-        setCursor(start);
+        setExpr((e) => e.slice(0, cursor - 1) + e.slice(cursor));
+        setCursor((c) => c - 1);
       }
       consume(); return;
     }
@@ -507,13 +429,13 @@ function Index() {
     if (menu?.kind === "PROMPT") {
       return (
         <>
-          <div style={{ fontSize: "4.2cqw", lineHeight: 1.2, opacity: 0.8 }}>
+          <div style={{ fontSize: "3.4cqw", lineHeight: 1.2, opacity: 0.8 }}>
             {menu.title}  ({menu.idx + 1}/{menu.steps.length})
           </div>
-          <div style={{ fontSize: "6cqw", lineHeight: 1.2, marginTop: "0.6cqw" }}>
+          <div style={{ fontSize: "5cqw", lineHeight: 1.2, marginTop: "0.6cqw" }}>
             {menu.steps[menu.idx]}
           </div>
-          <div className="mt-auto truncate text-right tabular-nums" style={{ fontSize: "11cqw", lineHeight: 1 }}>
+          <div className="mt-auto truncate text-right tabular-nums" style={{ fontSize: "9cqw", lineHeight: 1 }}>
             {expr || "0"}
           </div>
         </>
@@ -521,11 +443,11 @@ function Index() {
     }
     if (menu?.kind === "RESULT") {
       return (
-        <div style={{ fontSize: "4.2cqw", lineHeight: 1.25, overflow: "hidden" }}>
+        <div style={{ fontSize: "3.4cqw", lineHeight: 1.25, overflow: "hidden" }}>
           {menu.lines.slice(0, 5).map((l, i) => (
             <div key={i} className="font-mono whitespace-pre">{l}</div>
           ))}
-          <div className="opacity-60" style={{ fontSize: "3.2cqw" }}>AC to exit</div>
+          <div className="opacity-60" style={{ fontSize: "2.6cqw" }}>AC to exit</div>
         </div>
       );
     }
@@ -534,14 +456,14 @@ function Index() {
     const after = expr.slice(cursor);
     return (
       <>
-        <div className="truncate" style={{ fontSize: "7cqw", lineHeight: 1.15, marginTop: "0.4cqw" }}>
+        <div className="truncate" style={{ fontSize: "5.6cqw", lineHeight: 1.15, marginTop: "0.6cqw" }}>
           {before}
           {!result && <span className="animate-pulse">▮</span>}
           {after || (!expr && !result ? "\u00A0" : "")}
         </div>
         <div
           className="mt-auto truncate text-right tabular-nums font-semibold"
-          style={{ fontSize: "12cqw", lineHeight: 1 }}
+          style={{ fontSize: "10cqw", lineHeight: 1 }}
         >
           {result || (expr ? "" : "0")}
         </div>
@@ -550,12 +472,12 @@ function Index() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-0 sm:p-4">
+    <main className="flex min-h-screen items-center justify-center p-4">
       <h1 className="sr-only">Casio fx-991ES PLUS Calculator</h1>
       <div
         className="relative select-none mx-auto"
         style={{
-          width: "min(100vw, 100dvh, 560px)",
+          width: "min(92vw, calc(92vh * 717 / 1488), 420px)",
           containerType: "inline-size",
         }}
       >
@@ -570,9 +492,9 @@ function Index() {
         <div
           className="absolute font-mono"
           style={{
-            left: "12%", top: "8.5%", width: "76%", height: "14.6%",
+            left: "10.6%", top: "15.35%", width: "78.8%", height: "14.25%",
             color: "#1a1a1a",
-            padding: "0.6cqw 1.4cqw 0.8cqw",
+            padding: "0.9cqw 1.8cqw 1.2cqw",
             display: "flex",
             flexDirection: "column",
             overflow: "hidden",
@@ -581,9 +503,9 @@ function Index() {
           {/* status row */}
           <div
             className="flex items-center justify-between opacity-75"
-            style={{ fontSize: "3cqw", letterSpacing: "0.08em", lineHeight: 1 }}
+            style={{ fontSize: "2.35cqw", letterSpacing: "0.08em", lineHeight: 1 }}
           >
-            <span className="flex" style={{ gap: "1.4cqw" }}>
+            <span className="flex" style={{ gap: "1.15cqw" }}>
               <span style={{ visibility: shift ? "visible" : "hidden" }}>S</span>
               <span style={{ visibility: alpha ? "visible" : "hidden" }}>A</span>
               <span style={{ visibility: hyp ? "visible" : "hidden" }}>HYP</span>
@@ -623,10 +545,10 @@ function Index() {
 function MenuView({ title, opts }: { title: string; opts: string[] }) {
   return (
     <div className="flex flex-col items-center justify-center h-full w-full">
-      {title && <div className="text-center" style={{ fontSize: "3.6cqw", opacity: 0.7, marginBottom: "0.4cqw" }}>{title}</div>}
+      {title && <div className="text-center" style={{ fontSize: "3cqw", opacity: 0.7, marginBottom: "0.6cqw" }}>{title}</div>}
       <div
         className="grid grid-cols-2 mx-auto"
-        style={{ fontSize: "4.8cqw", lineHeight: 1.3, columnGap: "4cqw", rowGap: "0.1cqw" }}
+        style={{ fontSize: "4cqw", lineHeight: 1.4, columnGap: "4cqw", rowGap: "0.2cqw" }}
       >
         {opts.map((o) => (
           <div key={o} className="font-mono">{o}</div>
