@@ -20,33 +20,33 @@ const py = (y: number) => +(y / 1488 * 100).toFixed(2);
 // ============================================================
 // ROW 1: SHIFT  ALPHA  [D-pad]  MODE  ON  (round buttons just below screen)
 // ============================================================
-const R1_T  = py(530);
+const R1_T  = py(506);
 const R1_H  = py(80);
-const R1_W  = px(95);
+const R1_W  = px(80);
 
 // SCI PAD: 6 cols × 3 rows (rectangular buttons)
-const SP_W = px(100);
-const SP_H = py(70);
-const SP_COL = [40, 145, 252, 358, 463, 568].map(px);
-const SP_ROW = [738, 825, 910].map(py);
+const SP_W = px(95);
+const SP_H = py(65);
+const SP_COL = [33, 148, 258, 368, 478, 593].map(px);
+const SP_ROW = [727, 827, 922].map(py);
 
 // NUMPAD: 5 cols × 4 rows
-const NP_W = px(115);
-const NP_H = py(95);
-const NP_COL = [38, 173, 308, 443, 578].map(px);
-const NP_ROW = [1025, 1140, 1252, 1357].map(py);
+const NP_W = px(100);
+const NP_H = py(90);
+const NP_COL = [67, 185, 303, 427, 545].map(px);
+const NP_ROW = [1006, 1111, 1216, 1316].map(py);
 
 export const KEYS: KeyDef[] = [
   // ── Row 1 ───────────────────────────────────────────────────
-  { id: "SHIFT", base: "SHIFT",          l: px(60),  t: R1_T, w: R1_W, h: R1_H },
-  { id: "ALPHA", base: "ALPHA",          l: px(170), t: R1_T, w: R1_W, h: R1_H },
+  { id: "SHIFT", base: "SHIFT",          l: px(25),  t: R1_T, w: R1_W, h: R1_H },
+  { id: "ALPHA", base: "ALPHA",          l: px(135), t: R1_T, w: R1_W, h: R1_H },
   // D-pad arrows (absolute positions measured on the image)
-  { id: "UP",    base: "UP",    l: px(328), t: py(530), w: px(60), h: py(50) },
-  { id: "DOWN",  base: "DOWN",  l: px(328), t: py(650), w: px(60), h: py(50) },
-  { id: "LEFT",  base: "LEFT",  l: px(266), t: py(590), w: px(60), h: py(45) },
-  { id: "RIGHT", base: "RIGHT", l: px(388), t: py(590), w: px(60), h: py(45) },
-  { id: "MODE",  base: "MODE",  shift: "SETUP", l: px(478), t: R1_T, w: R1_W, h: R1_H },
-  { id: "ON",    base: "ON",                    l: px(585), t: R1_T, w: R1_W, h: R1_H },
+  { id: "UP",    base: "UP",    l: px(308), t: py(556), w: px(55), h: py(40) },
+  { id: "DOWN",  base: "DOWN",  l: px(308), t: py(641), w: px(55), h: py(40) },
+  { id: "LEFT",  base: "LEFT",  l: px(263), t: py(596), w: px(55), h: py(40) },
+  { id: "RIGHT", base: "RIGHT", l: px(363), t: py(596), w: px(55), h: py(40) },
+  { id: "MODE",  base: "MODE",  shift: "SETUP", l: px(495), t: R1_T, w: R1_W, h: R1_H },
+  { id: "ON",    base: "ON",                    l: px(605), t: R1_T, w: R1_W, h: R1_H },
 
   // ── Sci row A : √x  x²  x⁻¹  10^x  log  ln ─────────────────
   { id: "SQRT", base: "SQRT",  shift: "CBRT",        l: SP_COL[0], t: SP_ROW[0], w: SP_W, h: SP_H },
