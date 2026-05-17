@@ -472,12 +472,11 @@ function Index() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4">
+    <main className="flex min-h-screen items-center justify-center p-0 sm:p-4">
       <h1 className="sr-only">Casio fx-991ES PLUS Calculator</h1>
       <div
-        className="relative select-none mx-auto"
+        className="relative select-none mx-auto w-[min(100vw,calc(100vh*717/1488))] sm:!w-[min(92vw,calc(92vh*717/1488),420px)]"
         style={{
-          width: "min(92vw, calc(92vh * 717 / 1488), 420px)",
           containerType: "inline-size",
         }}
       >
